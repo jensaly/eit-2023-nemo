@@ -3,4 +3,8 @@ project(eit)
 
 set(CMAKE_CXX_STANDARD 20)
 
-add_executable(eit main.cpp)
+set(SOURCES main.cpp vehicle.cpp)
+
+set(HEADERS utility.h vehicle.h)
+
+add_executable(eit ${SOURCES} ${HEADERS})
