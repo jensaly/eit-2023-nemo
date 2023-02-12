@@ -4,11 +4,16 @@
 #include "utility.h"
 
 struct Vehicle {
-    uint16_t length; // m
-    uint16_t width; // m
-    uint16_t mass; // kg
+    float length; // m
+    float width; // m
+    float mass; // kg
 
-    Vehicle(uint16_t length, uint16_t width, uint16_t mass) : length{length}, width{width}, mass{mass} {}
+    Vehicle(float length, float width, float mass) : length{length}, width{width}, mass{mass} {}
+    Vehicle() : Vehicle(3.0, 2.0, 800) {}
+};
+
+struct Ferry {
+
 };
 
 #endif
