@@ -74,6 +74,9 @@ int main(int argc, char* argv[]) {
 
     // Main loop
     bool done = false;
+    Yard y = Yard(5, 60, 4);
+    y.Test4Cars();
+    y.Embark();
     while (!done)
     {
         // Poll and handle events (inputs, window resize, etc.)
@@ -97,9 +100,16 @@ int main(int argc, char* argv[]) {
         ImGui::NewFrame();
         ImGui::SetNextWindowBgAlpha(1);
         ImGui::Begin("Sidebar");
-
-        if (ImGui::Button("Systems")) {
-
+        if (ImPlot::BeginPlot("Cars", ImVec2(-1, -1), ImPlotFlags_AntiAliased | ImPlotFlags_Equal)) {
+            ImPlot::PushPlotClipRect();
+            ImVec2 origin = ImPlot::PlotToPixels(ImVec2(0,0));
+            ImVec2 basisx = ImPlot::PlotToPixels(ImVec2(1,0)) - origin;
+            ImVec2 basisy = ImPlot::PlotToPixels(ImVec2(0,1)) - origin;
+            auto width = y.ferry.queues[0].vehicles[0].width * basisx.x;
+            auto length = y.ferry.queues[0].vehicles[0].length * basisy.y;
+            ImPlot::GetPlotDrawList()->AddRectFilled(origin + ImVec2(0,0), origin + ImVec2(length, 0) + ImVec2(0, width), ImGui::ColorConvertFloat4ToU32(ImVec4(255, 255, 255, 255)));
+            ImPlot::PopPlotClipRect();
+            ImPlot::EndPlot();
         }
 
         ImGui::End();

@@ -8,7 +8,7 @@ set(CMAKE_CXX_STANDARD 20)
 if (SDL2_FOUND)
     find_package(OpenGL)
     set(SOURCES g_main.cpp vehicle.cpp preloadingqueue.cpp)
-    set(HEADERS utility.h vehicle.h preloadingqueue.h g_utility.h)
+    set(HEADERS utility.h vehicle.h preloadingqueue.h g_utility.h ferry.h ferry.cpp)
 
     include_directories(${OPENGL_INCLUDE_DIRS})
     include_directories(${SDL2_INCLUDE_DIRS})
