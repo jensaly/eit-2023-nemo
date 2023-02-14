@@ -10,10 +10,11 @@ struct Queue {
     const double total_size;
     const float width;
     uint16_t total_vehicles = 0;
+    float y;
 
     std::vector<Vehicle> vehicles;
 
-    Queue(std::string name, double size, float width);
+    Queue(std::string name, double size, float width, float y);
     void AddVehicleToQueue(Vehicle vehicle);
     void EraseVehicleFromQueue(std::vector<Vehicle>::iterator& vehicle);
 };
@@ -21,7 +22,7 @@ struct Queue {
 struct Ferry {
     std::vector<Queue> queues;
     double width;
-    double height;
+    double length;
 
     Ferry(int queues, double q_height, double q_width, double width, double height);
 };

@@ -1,5 +1,6 @@
 #include "preloadingqueue.h"
 #include "g_utility.h"
+#include "algorithms.h"
 
 int main(int argc, char* argv[]) {
     // Setup SDL
@@ -74,9 +75,10 @@ int main(int argc, char* argv[]) {
 
     // Main loop
     bool done = false;
-    Yard y = Yard(5, 60, 4);
-    y.Test4Cars();
-    y.Embark();
+    Yard y = Yard<WorstFit>(5, 60, 4, {});
+    Ferry ferry{5, 17.8, 1.9, 30.0, 30.0};
+    y.SimulteQueueArrival(std::gamma_distribution<double>(1.4, 1.5), 30);
+    y.Embark(ferry);
     while (!done)
     {
         // Poll and handle events (inputs, window resize, etc.)
@@ -101,14 +103,18 @@ int main(int argc, char* argv[]) {
         ImGui::SetNextWindowBgAlpha(1);
         ImGui::Begin("Sidebar");
         if (ImPlot::BeginPlot("Cars", ImVec2(-1, -1), ImPlotFlags_AntiAliased | ImPlotFlags_Equal)) {
-            ImPlot::PushPlotClipRect();
-            ImVec2 origin = ImPlot::PlotToPixels(ImVec2(0,0));
-            ImVec2 basisx = ImPlot::PlotToPixels(ImVec2(1,0)) - origin;
-            ImVec2 basisy = ImPlot::PlotToPixels(ImVec2(0,1)) - origin;
-            auto width = y.ferry.queues[0].vehicles[0].width * basisx.x;
-            auto length = y.ferry.queues[0].vehicles[0].length * basisy.y;
-            ImPlot::GetPlotDrawList()->AddRectFilled(origin + ImVec2(0,0), origin + ImVec2(length, 0) + ImVec2(0, width), ImGui::ColorConvertFloat4ToU32(ImVec4(255, 255, 255, 255)));
-            ImPlot::PopPlotClipRect();
+            for (int i = 0; i < ferry.queues.size(); i++) {
+                auto& q = ferry.queues[i];
+                for (int j = 0; j < ferry.queues[i].vehicles.size(); j++) {
+                    auto& v = q.vehicles[j];
+                    ImVec2 bottom = ImPlot::PlotToPixels(ImVec2(v.x, v.y));
+                    ImVec2 top = ImPlot::PlotToPixels(ImVec2(v.x + v.length, v.y + v.width));
+                    ImPlot::GetPlotDrawList()->AddRectFilled(bottom, top, ImGui::ColorConvertFloat4ToU32(v.col));
+                }
+                double xvals[2] = {0, q.total_size};
+                double yvals[2] = {q.width * (i+1), q.width * (i+1)};
+                ImPlot::PlotLine(("Line " + std::to_string(i)).c_str(), xvals, yvals, 2);
+            }
             ImPlot::EndPlot();
         }
 
