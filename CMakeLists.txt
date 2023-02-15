@@ -5,7 +5,7 @@ find_package(SDL2)
 
 set(CMAKE_CXX_STANDARD 20)
 
-if (SDL2_FOUND)
+if (SDL_FOUND)
     find_package(OpenGL)
     set(SOURCES g_main.cpp vehicle.cpp preloadingqueue.cpp ferry.cpp)
     set(HEADERS utility.h vehicle.h preloadingqueue.h g_utility.h ferry.h algorithms.h)
@@ -38,7 +38,7 @@ if (SDL2_FOUND)
             PUBLIC ${SDL2_DIR}/include
             )
 else()
-    set(SOURCES main.cpp vehicle.cpp preloadingqueue.cpp)
-    set(HEADERS utility.h vehicle.h preloadingqueue.h)
+    set(SOURCES main.cpp vehicle.cpp preloadingqueue.cpp ferry.cpp)
+    set(HEADERS utility.h vehicle.h preloadingqueue.h algorithms.h ferry.h)
     add_executable(eit ${SOURCES} ${HEADERS})
 endif ()

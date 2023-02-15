@@ -10,7 +10,8 @@ struct Yard {
     int vehicles_in_yard = 0;
     Algorithm algorithm; // selected algorithm for fine sorting
 
-    Yard(int number_of_queues, double queue_length, double queue_width, Algorithm algorithm) : algorithm{algorithm} {
+    Yard(int number_of_queues, double queue_length, double queue_width) {
+        algorithm = Algorithm();
         for (int i = 0; i < number_of_queues; i++) {
             queues.emplace_back(std::to_string(i), queue_length, queue_width, queue_width * i);
         }

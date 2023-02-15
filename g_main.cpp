@@ -1,4 +1,3 @@
-#include "preloadingqueue.h"
 #include "g_utility.h"
 #include "algorithms.h"
 
@@ -75,7 +74,7 @@ int main(int argc, char* argv[]) {
 
     // Main loop
     bool done = false;
-    Yard y = Yard<WorstFit>(5, 60, 4, {});
+    Yard y = Yard<WorstFit>(5, 60, 4);
     Ferry ferry{5, 17.8, 1.9, 5 * 1.9, 18.0};
     y.SimulteQueueArrival(std::gamma_distribution<double>(1.4, 1.5), 30);
     y.Embark(ferry);
@@ -109,7 +108,7 @@ int main(int argc, char* argv[]) {
                     auto& v = q.vehicles[j];
                     ImVec2 bottom = ImPlot::PlotToPixels(ImVec2(v.x, v.y));
                     ImVec2 top = ImPlot::PlotToPixels(ImVec2(v.x + v.length, v.y + v.width));
-                    ImPlot::GetPlotDrawList()->AddRectFilled(bottom, top, ImGui::ColorConvertFloat4ToU32(v.col));
+                    ImPlot::GetPlotDrawList()->AddRectFilled(bottom, top, ImGui::ColorConvertFloat4ToU32(ImVec4(v.col[0], v.col[1], v.col[2], v.col[3])));
                 }
                 double xvals[2] = {0, q.total_size};
                 double yvals[2] = {q.width * (i+1), q.width * (i+1)};

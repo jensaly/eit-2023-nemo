@@ -1,13 +1,8 @@
-#include "preloadingqueue.h"
+#include "algorithms.h"
 
 int main() {
-    std::cout << "Ferry goes brrrrr";
-    Vehicle(12, 12, 12);
-    std::vector<Vehicle> vehicles;
-    vehicles.emplace_back(12, 12, 12);
-    vehicles.emplace_back(12, 12, 12);
-    vehicles.emplace_back(12, 12, 12);
-
-    auto y = Yard(7, 17.0, 4.0);
-    y.GenerateSetOfVehicles(100);
+    Yard y = Yard<WorstFit>(5, 60, 4);
+    Ferry ferry{5, 17.8, 1.9, 5 * 1.9, 18.0};
+    y.SimulteQueueArrival(std::gamma_distribution<double>(1.4, 1.5), 30);
+    y.Embark(ferry);
 }
