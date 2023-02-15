@@ -8,5 +8,6 @@
 #include <algorithm>
 #include <utility>
 #include <random>
+#include <string>
 
 #endif
