@@ -76,7 +76,7 @@ int main(int argc, char* argv[]) {
     // Main loop
     bool done = false;
     Yard y = Yard<WorstFit>(5, 60, 4, {});
-    Ferry ferry{5, 17.8, 1.9, 30.0, 30.0};
+    Ferry ferry{5, 17.8, 1.9, 5 * 1.9, 18.0};
     y.SimulteQueueArrival(std::gamma_distribution<double>(1.4, 1.5), 30);
     y.Embark(ferry);
     while (!done)
@@ -114,6 +114,10 @@ int main(int argc, char* argv[]) {
                 double xvals[2] = {0, q.total_size};
                 double yvals[2] = {q.width * (i+1), q.width * (i+1)};
                 ImPlot::PlotLine(("Line " + std::to_string(i)).c_str(), xvals, yvals, 2);
+                float car_x = ferry.car_com.first, car_y = ferry.car_com.second;
+                ImPlot::PlotScatter("Car COM", &car_x, &car_y, 1);
+                float x = ferry.com.first, y = ferry.com.second;
+                ImPlot::PlotScatter("COM", &x, &y, 1);
             }
             ImPlot::EndPlot();
         }

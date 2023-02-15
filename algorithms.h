@@ -27,6 +27,14 @@ struct WorstFit {
             f_min_q->AddVehicleToQueue(std::move(*v));
             min_q->EraseVehicleFromQueue(v);
         }
+        ferry.FindCOM();
+    }
+};
+
+// Algorithm that does nothing, just for testing how the operator() overloading works
+struct DoNothing {
+    void operator()(Ferry& ferry, Yard<DoNothing>& yard) {
+
     }
 };
 
