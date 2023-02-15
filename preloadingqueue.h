@@ -1,7 +1,7 @@
 #ifndef EIT_PRELOADINGQUEUE_H
 #define EIT_PRELOADINGQUEUE_H
 
-#include "ferry.h"
+#include "filehandler.h"
 
 template<class Algorithm>
 struct Yard {
@@ -9,6 +9,7 @@ struct Yard {
     std::deque<Vehicle> pre_yard; // road leading up to yard
     int vehicles_in_yard = 0;
     Algorithm algorithm; // selected algorithm for fine sorting
+    FileHandler fh{};
 
     Yard(int number_of_queues, double queue_length, double queue_width) {
         algorithm = Algorithm();
@@ -34,13 +35,16 @@ struct Yard {
 
     // Current simulating arrivals with a generic, pre-initialized distribution
     // Uses a mersenne twister for generating random numbers from the distribution
+    // Also uses a random generator for plate_nr at this time
     template<typename T> void SimulteQueueArrival(T distribution, double time) {
         static std::mt19937 generator{std::random_device{}()};
         double t = 0;
         while (t < time) {
             double dt = distribution(generator);
             t += dt;
-            Arrival(Vehicle(4.18 * (1 + (0.2f * rand() / RAND_MAX - 0.1)), 1.72f * (1 + (0.2f * rand() / RAND_MAX - 0.1)), 1265 * (1 + (0.2 * rand() / RAND_MAX - 0.1)), t)); // defaulted to a Yaris Cross because no better data
+            std::string plate_nr = std::string(1, ('A' + rand()%26)) + std::string(1,('A' + rand()%26));
+            plate_nr += std::to_string(rand() % 10) + std::to_string(rand() % 10) + std::to_string(rand() % 10) + std::to_string(rand() % 10) + std::to_string(rand() % 10);
+            Arrival(Vehicle("B", plate_nr, 4.18 * (1 + (0.2f * rand() / RAND_MAX - 0.1)), 1.72f * (1 + (0.2f * rand() / RAND_MAX - 0.1)), 1265 * (1 + (0.2 * rand() / RAND_MAX - 0.1)), t)); // defaulted to a Yaris Cross because no better data
             vehicles_in_yard++;
         }
     }

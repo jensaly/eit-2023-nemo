@@ -28,6 +28,7 @@ struct WorstFit {
             min_q->EraseVehicleFromQueue(v);
         }
         ferry.FindCOM();
+        yard.fh.Write(ferry);
     }
 };
 
