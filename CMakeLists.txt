@@ -3,9 +3,11 @@ project(eit)
 
 find_package(SDL2)
 
+find_package(CURL)
+
 set(CMAKE_CXX_STANDARD 20)
 
-if (SDL2_FOUND)
+if (SDL_FOUND)
     find_package(OpenGL)
     set(SOURCES g_main.cpp vehicle.cpp preloadingqueue.cpp ferry.cpp)
     set(HEADERS utility.h vehicle.h preloadingqueue.h g_utility.h ferry.h algorithms.h FileHandler.h filehandler.cpp)
@@ -18,7 +20,7 @@ if (SDL2_FOUND)
 
     add_executable(eit_graphical ${SOURCES} ${HEADERS} ${IMGUI_SRC})
 
-    target_link_libraries(eit_graphical PUBLIC ${SDL2_LIBRARIES} ${Boost_LIBRARIES} ${OPENGL_LIBRARIES})
+    target_link_libraries(eit_graphical PUBLIC ${SDL2_LIBRARIES} ${OPENGL_LIBRARIES} ${CURL_LIBRARIES})
 
     target_sources( eit_graphical
             PUBLIC
@@ -38,7 +40,9 @@ if (SDL2_FOUND)
             PUBLIC ${SDL2_DIR}/include
             )
 else()
-    set(SOURCES main.cpp vehicle.cpp preloadingqueue.cpp ferry.cpp)
-    set(HEADERS utility.h vehicle.h preloadingqueue.h algorithms.h ferry.h FileHandler.h)
+    set(SOURCES main.cpp vehicle.cpp preloadingqueue.cpp ferry.cpp filehandler.cpp)
+    set(HEADERS utility.h vehicle.h preloadingqueue.h algorithms.h ferry.h filehandler.h)
     add_executable(eit ${SOURCES} ${HEADERS})
+
+    target_link_libraries(eit PUBLIC ${CURL_LIBRARIES})
 endif ()

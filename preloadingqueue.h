@@ -53,10 +53,6 @@ struct Yard {
     void Embark(Ferry& f) {
         algorithm(f, *this);
     }
-
-    //void Test4Cars();
 };
-
-//void WorstFitAlgorithm(Ferry& ferry, Yard& yard);
 
 #endif //EIT_PRELOADINGQUEUE_H

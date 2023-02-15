@@ -12,5 +12,7 @@
 #include <filesystem>
 #include <fstream>
 
+#include <curl/curl.h>
+
 
 #endif
