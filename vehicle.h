@@ -3,6 +3,12 @@
 
 #include "utility.h"
 
+enum class VehicleFlags {
+    Ambulance = 0,
+    HC = 1,
+    Heavy = 2,
+};
+
 struct Vehicle {
     std::string type = "B";
     std::string plate_nr;
@@ -14,6 +20,7 @@ struct Vehicle {
     float y = 0;
     float vehicle_half_buff = 0.15; // lengthwise clearance between vehicles
     float col[4]; // car color, used in part by the graphical side
+    std::vector<bool> characteristics; // characteristics of a vehicle
 
     Vehicle(std::string type, std::string plate_nr, float length, float width, float mass, float arrival_time);
     Vehicle() : Vehicle("B", "dbg007", 4.18, 1.765, 1265, -1) {}
