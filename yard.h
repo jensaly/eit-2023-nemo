@@ -3,16 +3,18 @@
 
 #include "filehandler.h"
 
-template<class Algorithm>
+template<class CoarseAlgorithm, class FineAlgorithm>
 struct Yard {
     std::vector<Queue> queues; // main yard area
     std::deque<Vehicle> pre_yard; // road leading up to yard
     int vehicles_in_yard = 0;
-    Algorithm algorithm; // selected algorithm for fine sorting
+    FineAlgorithm f_algorithm; // selected algorithm for fine sorting
+    CoarseAlgorithm a_algorithm; // selected algorithm for sorting arriving cars
     FileHandler fh{};
 
     Yard(int number_of_queues, double queue_length, double queue_width) {
-        algorithm = Algorithm();
+        f_algorithm = FineAlgorithm();
+        a_algorithm = CoarseAlgorithm();
         for (int i = 0; i < number_of_queues; i++) {
             queues.emplace_back(std::to_string(i), queue_length, queue_width, queue_width * i);
         }
@@ -21,16 +23,11 @@ struct Yard {
     // Function takes a vehicle and puts it into a Yard queue depending on a set of rules
     // At present, that rule is "whichever queue has the most size available)
     // If the arrival cannot be slotted into the yard, it is instead put in a single pre-queue
-    bool Arrival(Vehicle vehicle) {
+    void Arrival(Vehicle vehicle) {
         // TODO: Replace the code here with a scoring system
-        auto& min_queue = *std::max_element(queues.begin(), queues.end(), [&](auto& a, auto& b){ return a.available_size < b.available_size;});
-        auto x = 0;
-        if (min_queue.available_size < vehicle.length) {
+        if (!a_algorithm(queues, vehicle)) {
             pre_yard.push_back(vehicle);
-            return false;
         }
-        min_queue.AddVehicleToQueue(vehicle);
-        return true;
     }
 
     // Current simulating arrivals with a generic, pre-initialized distribution
@@ -51,7 +48,7 @@ struct Yard {
 
     // Runs the embarking by calling operator() on the selected algorithm
     void Embark(Ferry& f) {
-        algorithm(f, *this);
+        f_algorithm(f, queues, fh);
     }
 };
 

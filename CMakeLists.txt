@@ -7,10 +7,10 @@ find_package(CURL)
 
 set(CMAKE_CXX_STANDARD 20)
 
-if (SDL_FOUND)
+if (SDL2_FOUND)
     find_package(OpenGL)
-    set(SOURCES g_main.cpp vehicle.cpp preloadingqueue.cpp ferry.cpp)
-    set(HEADERS utility.h vehicle.h preloadingqueue.h g_utility.h ferry.h algorithms.h FileHandler.h filehandler.cpp)
+    set(SOURCES g_main.cpp vehicle.cpp yard.cpp ferry.cpp)
+    set(HEADERS utility.h vehicle.h yard.h g_utility.h ferry.h algorithms.h FileHandler.h filehandler.cpp)
 
     include_directories(${OPENGL_INCLUDE_DIRS})
     include_directories(${SDL2_INCLUDE_DIRS})
@@ -44,5 +44,5 @@ else()
     set(HEADERS utility.h vehicle.h preloadingqueue.h algorithms.h ferry.h filehandler.h)
     add_executable(eit ${SOURCES} ${HEADERS})
 
-    target_link_libraries(eit PUBLIC ${CURL_LIBRARIES})
+    target_link_libraries(eit PUBLIC ${CURL_LIBRARY})
 endif ()
