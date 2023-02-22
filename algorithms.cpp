@@ -1,8 +1,10 @@
 #include "algorithms.h"
 #include "ferry.h"
 #include "filehandler.h"
+#include "yard.h"
 
-void WorstFit::operator()(Ferry& ferry, std::vector<Queue>& queues, FileHandler& fh) {
+void WorstFit::operator()(Ferry& ferry, Yard& yard, FileHandler& fh) {
+    auto& queues = yard.queues;
     while (true) {
         // Find first available car, if no cars available all are sorted
         auto q = find_if(queues.begin(), queues.end(), [&](auto &queue) { return queue.total_vehicles > 0; });
@@ -32,7 +34,8 @@ void WorstFit::operator()(Ferry& ferry, std::vector<Queue>& queues, FileHandler&
     fh.Write(ferry);
 }
 // Coarse-sorting version of WorstFit algorithm, individual car arrival into queues
-bool WorstFit::operator()(std::vector<Queue>& queues, Vehicle& vehicle) {
+bool WorstFit::operator()(Yard& yard, Vehicle& vehicle) {
+    auto& queues = yard.queues;
     auto& min_queue = *std::max_element(queues.begin(), queues.end(), [&](auto& a, auto& b){ return a.available_size < b.available_size;});
     if (min_queue.available_size < vehicle.length) {
         return false;
@@ -41,7 +44,8 @@ bool WorstFit::operator()(std::vector<Queue>& queues, Vehicle& vehicle) {
     return true;
 }
 
-void BestFit::operator()(Ferry& ferry, std::vector<Queue>& queues, FileHandler& fh) {
+void BestFit::operator()(Ferry& ferry, Yard& yard, FileHandler& fh) {
+    auto& queues = yard.queues;
     while (true) {
         // Find first available car, if no cars available all are sorted
         auto q = find_if(queues.begin(), queues.end(), [&](auto &queue) { return queue.total_vehicles > 0; });
@@ -71,7 +75,8 @@ void BestFit::operator()(Ferry& ferry, std::vector<Queue>& queues, FileHandler& 
     fh.Write(ferry);
 }
 // Coarse-sorting version of WorstFit algorithm, individual car arrival into queues
-bool BestFit::operator()(std::vector<Queue>& queues, Vehicle& vehicle) {
+bool BestFit::operator()(Yard& yard, Vehicle& vehicle) {
+    auto& queues = yard.queues;
     auto& min_queue = *std::max_element(queues.begin(), queues.end(), [&](auto& a, auto& b){ return a.available_size < b.available_size;});
     if (min_queue.available_size < vehicle.length) {
         return false;
@@ -81,11 +86,12 @@ bool BestFit::operator()(std::vector<Queue>& queues, Vehicle& vehicle) {
 }
 
 
-void BasicRules::operator()(Ferry& ferry, std::vector<Queue>& queues, FileHandler& fh) {
+void BasicRules::operator()(Ferry& ferry, Yard& yard, FileHandler& fh) {
 
 }
 
-bool BasicRules::operator()(std::vector<Queue>& queues, Vehicle& vehicle) {
+bool BasicRules::operator()(Yard& yard, Vehicle& vehicle) {
+    auto& queues = yard.queues;
     std::priority_queue<std::pair<uint64_t, size_t>> queue_weight;
     for (int i = 0; i < queues.size(); i++) {
         auto& q = queues[i];

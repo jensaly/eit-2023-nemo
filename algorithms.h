@@ -9,8 +9,8 @@ struct FileHandler;
 struct Ferry;
 
 struct BaseAlgorithm {
-    virtual void operator()(Ferry& ferry, std::vector<Queue>& queues, FileHandler& fh) = 0;
-    virtual bool operator()(std::vector<Queue>& queues, Vehicle& vehicle) = 0;
+    virtual void operator()(Ferry& ferry, Yard& yard, FileHandler& fh) = 0;
+    virtual bool operator()(Yard& yard, Vehicle& vehicle) = 0;
     virtual std::string AlgorithmName() { return "Unset"; }
 };
 
@@ -26,9 +26,9 @@ struct BaseAlgorithm {
  */
 struct WorstFit : BaseAlgorithm {
     // Fine-sorting version of WorstFit algorithm, from Yard queues to Ferry queues
-    void operator()(Ferry& ferry, std::vector<Queue>& queues, FileHandler& fh) override;
+    void operator()(Ferry& ferry, Yard& yard, FileHandler& fh) override;
     // Coarse-sorting version of WorstFit algorithm, individual car arrival into queues
-    bool operator()(std::vector<Queue>& queues, Vehicle& vehicle) override;
+    bool operator()(Yard& yard, Vehicle& vehicle) override;
     virtual std::string AlgorithmName() { return "Worst fit"; }
 };
 
@@ -38,15 +38,15 @@ struct WorstFit : BaseAlgorithm {
  */
 struct BestFit : BaseAlgorithm{
     // Fine-sorting version of WorstFit algorithm, from Yard queues to Ferry queues
-    void operator()(Ferry& ferry, std::vector<Queue>& queues, FileHandler& fh) override;
+    void operator()(Ferry& ferry, Yard& yard, FileHandler& fh) override;
     // Coarse-sorting version of WorstFit algorithm, individual car arrival into queues
-    bool operator()(std::vector<Queue>& queues, Vehicle& vehicle) override;
+    bool operator()(Yard& yard, Vehicle& vehicle) override;
     virtual std::string AlgorithmName() { return "Best fit"; }
 };
 
 struct BasicRules : BaseAlgorithm{
-    void operator()(Ferry& ferry, std::vector<Queue>& queues, FileHandler& fh) override;
-    bool operator()(std::vector<Queue>& queues, Vehicle& vehicle) override;
+    void operator()(Ferry& ferry, Yard& yard, FileHandler& fh) override;
+    bool operator()(Yard& yard, Vehicle& vehicle) override;
     virtual std::string AlgorithmName() { return "Hard-coded ruleset"; }
 };
 
@@ -55,12 +55,8 @@ struct BasicRules : BaseAlgorithm{
 // Algorithm that does nothing, just for testing how the operator() overloading works
 // Also illustrative for how the operator() is supposed to be set up
 struct DoNothing : BaseAlgorithm {
-    void operator()(Ferry& ferry, std::vector<Queue>& queues, FileHandler& fh) override {
-
-    }
-    bool operator()(std::vector<Queue>& queues, Vehicle& vehicle) override {
-        return false;
-    }
+    void operator()(Ferry& ferry, Yard& yard, FileHandler& fh) override {}
+    bool operator()(Yard& yard, Vehicle& vehicle) override { return false; }
     virtual std::string AlgorithmName() { return "Do nothing"; }
 };
 

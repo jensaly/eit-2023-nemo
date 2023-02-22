@@ -26,7 +26,7 @@ struct Yard {
     // If the arrival cannot be slotted into the yard, it is instead put in a single pre-queue
     void Arrival(Vehicle vehicle) {
         // TODO: Replace the code here with a scoring system
-        if (!(*c_algorithm)(queues, vehicle)) {
+        if (!(*c_algorithm)(*this, vehicle)) {
             pre_yard.push_back(vehicle);
         }
     }
@@ -49,7 +49,7 @@ struct Yard {
 
     // Runs the embarking by calling operator() on the selected algorithm
     void Embark(Ferry& f) {
-        (*f_algorithm)(f, queues, fh);
+        (*f_algorithm)(f, *this, fh);
     }
 
     template<typename CoarseAlgorithm> void SetCoarseAlgorithm() {
