@@ -7,7 +7,7 @@ Vehicle::Vehicle(std::string type, std::string plate_nr, float length, float wid
         SetFlag(VehicleFlags::Heavy);
     }
     else {
-        if (rand() % 5 == 0) {
+        if (rand() % 3 == 0) {
             SetFlag(VehicleFlags::Ambulance);
             col[0] = 1.0f; col[1] = 0; col[2] = 0;
         }

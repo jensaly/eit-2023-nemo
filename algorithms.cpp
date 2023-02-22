@@ -100,8 +100,8 @@ void BasicRules::operator()(Ferry& ferry, Yard& yard, FileHandler& fh) {
                 if (v.GetFlag(VehicleFlags::Ambulance)) {
                     vehicle_weight += 10000;
                 }
+                queue_weight.push({vehicle_weight, i});
             }
-            queue_weight.push({vehicle_weight, i});
         }
         if (queue_weight.empty()) {
             break;
@@ -125,6 +125,7 @@ void BasicRules::operator()(Ferry& ferry, Yard& yard, FileHandler& fh) {
  * Priority means the queue prefers certain types of vehicles
  * Vehicle characteristics are checked against these vector<bool>'s
  * Vehicles are prioritized for their reserved queues, and down-prioritized for non-reserved
+ * Weight is a function of point score and available space in every queue.
  * A queue with 0 weight is open for all
  */
 bool BasicRules::operator()(Yard& yard, Vehicle& vehicle) {
@@ -148,11 +149,11 @@ bool BasicRules::operator()(Yard& yard, Vehicle& vehicle) {
                 vehicle_weight += 1;
             }
         }
-        queue_weight.push(std::pair<uint64_t, size_t>(vehicle_weight, i));
+        queue_weight.push(std::pair<uint64_t, size_t>(vehicle_weight * q.available_size, i));
     }
     auto best = queue_weight.top();
     auto best_queue = &queues[best.second];
-    // Finds 
+    // Finds
     while (!best_queue->IsAvailableSpace(vehicle)) {
         queue_weight.pop();
         best = queue_weight.top();
@@ -163,5 +164,5 @@ bool BasicRules::operator()(Yard& yard, Vehicle& vehicle) {
         return false;
     }
     best_queue->AddVehicleToQueue(vehicle);
-    return false;
+    return true;
 }
