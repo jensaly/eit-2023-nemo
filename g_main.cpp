@@ -103,13 +103,13 @@ int main(int argc, char* argv[]) {
         ImGui::NewFrame();
         ImGui::SetNextWindowBgAlpha(1);
         ImGui::Begin("Main");
-        if (ImGui::BeginCombo("Coarse Algorithm", typeid(*y.c_algorithm.get()).name())) {
+        if (ImGui::BeginCombo("Coarse Algorithm", y.c_algorithm->AlgorithmName().c_str())) {
             if (ImGui::Selectable("Worst Fit")) { y.SetCoarseAlgorithm<WorstFit>(); }
             if (ImGui::Selectable("Best Fit")) { y.SetCoarseAlgorithm<BestFit>(); }
             if (ImGui::Selectable("Basic Rules")) { y.SetCoarseAlgorithm<BasicRules>(); }
             ImGui::EndCombo();
         }
-        if (ImGui::BeginCombo("Fine Algorithm", typeid(*y.f_algorithm.get()).name())) {
+        if (ImGui::BeginCombo("Fine Algorithm", y.f_algorithm->AlgorithmName().c_str())) {
             if (ImGui::Selectable("Worst Fit")) { y.SetFineAlgorithm<WorstFit>(); }
             if (ImGui::Selectable("Best Fit")) { y.SetFineAlgorithm<BestFit>(); }
             ImGui::EndCombo();
