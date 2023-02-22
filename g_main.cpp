@@ -1,5 +1,5 @@
 #include "g_utility.h"
-#include "algorithms.h"
+#include "yard.h"
 
 int main(int argc, char* argv[]) {
     // Setup SDL
@@ -74,11 +74,9 @@ int main(int argc, char* argv[]) {
 
     // Main loop
     bool done = false;
-
-    Yard y = Yard<WorstFit, WorstFit>(5, 60, 4);
+    srand(time(NULL));
+    Yard y = Yard(DoNothing(), DoNothing(), 5, 60, 4);
     Ferry ferry{5, 17.8, 1.9, 5 * 1.9, 18.0};
-    y.SimulteQueueArrival(std::gamma_distribution<double>(1.4, 1.5), 30);
-    y.Embark(ferry);
     while (!done)
     {
         // Poll and handle events (inputs, window resize, etc.)
@@ -101,7 +99,21 @@ int main(int argc, char* argv[]) {
         ImGui_ImplSDL2_NewFrame();
         ImGui::NewFrame();
         ImGui::SetNextWindowBgAlpha(1);
-        ImGui::Begin("Sidebar");
+        ImGui::Begin("Main");
+        if (ImGui::BeginCombo("Coarse Algorithm", typeid(*y.c_algorithm.get()).name())) {
+            if (ImGui::Selectable("Worst Fit")) { y.SetCoarseAlgorithm<WorstFit>(); }
+            if (ImGui::Selectable("Best Fit")) { y.SetCoarseAlgorithm<BestFit>(); }
+            ImGui::EndCombo();
+        }
+        if (ImGui::BeginCombo("Fine Algorithm", typeid(*y.f_algorithm.get()).name())) {
+            if (ImGui::Selectable("Worst Fit")) { y.SetFineAlgorithm<WorstFit>(); }
+            if (ImGui::Selectable("Best Fit")) { y.SetFineAlgorithm<BestFit>(); }
+            ImGui::EndCombo();
+        }
+        if (ImGui::Button("Embark")){
+            y.SimulteQueueArrival(std::gamma_distribution(1.4, 1.5), 30);
+            y.Embark(ferry);
+        }
         if (ImPlot::BeginPlot("Cars", ImVec2(-1, -1), ImPlotFlags_AntiAliased | ImPlotFlags_Equal)) {
             for (int i = 0; i < ferry.queues.size(); i++) {
                 auto& q = ferry.queues[i];
