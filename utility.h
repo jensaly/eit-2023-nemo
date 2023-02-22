@@ -11,6 +11,8 @@
 #include <string>
 #include <filesystem>
 #include <fstream>
+#include <initializer_list>
+#include <map>
 
 #include <curl/curl.h>
 

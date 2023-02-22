@@ -1,24 +1,5 @@
 #include "ferry.h"
 
-
-Queue::Queue(std::string name, double size, float width, float y) : name{std::move(name)}, available_size{size}, total_size{size}, width{width}, y{y} {
-
-}
-
-void Queue::AddVehicleToQueue(Vehicle vehicle) {
-    vehicle.y = y + (width - vehicle.width) / 2;
-    vehicle.x = total_size - available_size;
-    available_size -= vehicle.length;
-    vehicles.push_back(vehicle);
-    total_vehicles++;
-}
-
-void Queue::EraseVehicleFromQueue(std::vector<Vehicle>::iterator& vehicle) {
-    available_size += vehicle->length;
-    vehicles.erase(vehicle);
-    total_vehicles--;
-}
-
 // Calculates COM as the middle of any given vehicle
 // Not a good approximation for trucks, prudent to update
 // if able

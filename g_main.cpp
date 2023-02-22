@@ -76,6 +76,9 @@ int main(int argc, char* argv[]) {
     bool done = false;
     srand(time(NULL));
     Yard y = Yard(DoNothing(), DoNothing(), 5, 60, 4);
+    y.queues[0].SetReservedFlag(VehicleFlags::Ambulance);
+    y.queues[0].SetReservedFlag(VehicleFlags::HC);
+    y.queues[2].SetPriorityFlag(VehicleFlags::Heavy);
     Ferry ferry{5, 17.8, 1.9, 5 * 1.9, 18.0};
     while (!done)
     {
@@ -103,6 +106,7 @@ int main(int argc, char* argv[]) {
         if (ImGui::BeginCombo("Coarse Algorithm", typeid(*y.c_algorithm.get()).name())) {
             if (ImGui::Selectable("Worst Fit")) { y.SetCoarseAlgorithm<WorstFit>(); }
             if (ImGui::Selectable("Best Fit")) { y.SetCoarseAlgorithm<BestFit>(); }
+            if (ImGui::Selectable("Basic Rules")) { y.SetCoarseAlgorithm<BasicRules>(); }
             ImGui::EndCombo();
         }
         if (ImGui::BeginCombo("Fine Algorithm", typeid(*y.f_algorithm.get()).name())) {

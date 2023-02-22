@@ -80,10 +80,30 @@ bool BestFit::operator()(std::vector<Queue>& queues, Vehicle& vehicle) {
     return true;
 }
 
+
 void BasicRules::operator()(Ferry& ferry, std::vector<Queue>& queues, FileHandler& fh) {
 
 }
 
 bool BasicRules::operator()(std::vector<Queue>& queues, Vehicle& vehicle) {
-
+    std::priority_queue<std::pair<uint64_t, size_t>> queue_weight;
+    for (int i = 0; i < queues.size(); i++) {
+        auto& q = queues[i];
+        uint64_t vehicle_weight = 0;
+        for (int j = 0; j < q.reserved.size(); j++) {
+            if (vehicle.characteristics[j] && q.reserved[j]) {
+                vehicle_weight += 10000;
+            }
+        }
+        queue_weight.push(std::pair<uint64_t, size_t>(vehicle_weight, i));
+    }
+    auto best = queue_weight.top();
+    auto best_queue = &queues[best.second];
+    while (!best_queue->IsAvailableSpace(vehicle)) {
+        queue_weight.pop();
+        best = queue_weight.top();
+        best_queue = &queues[best.second];
+    }
+    best_queue->AddVehicleToQueue(vehicle);
+    return false;
 }

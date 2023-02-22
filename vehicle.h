@@ -25,7 +25,7 @@ struct Vehicle {
     Vehicle(std::string type, std::string plate_nr, float length, float width, float mass, float arrival_time);
     Vehicle() : Vehicle("B", "dbg007", 4.18, 1.765, 1265, -1) {}
     void SetFlag(VehicleFlags flag) { characteristics[(int)flag] = true; }
-    void UnsetFlagTrue(VehicleFlags flag) { characteristics[(int)flag] = false; }
+    void UnsetFlag(VehicleFlags flag) { characteristics[(int)flag] = false; }
     bool GetFlag(VehicleFlags flag) { return characteristics[(int)flag]; }
 };
 
