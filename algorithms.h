@@ -50,8 +50,6 @@ struct BasicRules : BaseAlgorithm{
     virtual std::string AlgorithmName() { return "Hard-coded ruleset"; }
 };
 
-
-
 // Algorithm that does nothing, just for testing how the operator() overloading works
 // Also illustrative for how the operator() is supposed to be set up
 struct DoNothing : BaseAlgorithm {
