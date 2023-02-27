@@ -52,6 +52,12 @@ struct Yard {
         (*f_algorithm)(f, *this, fh);
     }
 
+    void clear() {
+        for (auto& q : queues) q.clear();
+        pre_yard.clear();
+        vehicles_in_yard = 0;
+    }
+
     template<typename CoarseAlgorithm> void SetCoarseAlgorithm() {
         c_algorithm = std::make_unique<CoarseAlgorithm>();
     }

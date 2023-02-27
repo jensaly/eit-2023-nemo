@@ -12,6 +12,7 @@ struct Ferry {
 
     Ferry(int queues, double q_height, double q_width, double width, double height);
     void FindCOM();
+    void clear();
 };
 
 #endif //EIT_FERRY_H

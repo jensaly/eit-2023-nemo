@@ -27,3 +27,8 @@ Ferry::Ferry(int num_queues, double q_length, double q_width, double width, doub
     }
     com = {length / 2, width / 2};
 }
+
+void Ferry::clear() {
+    for (auto& q : queues) q.clear();
+    car_com = {0,0};
+}

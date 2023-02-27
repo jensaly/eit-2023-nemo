@@ -26,6 +26,7 @@ struct Queue {
     void UnsetPriorityFlag(VehicleFlags flag) { priority[(int)flag] = false; }
     bool GetPriorityFlag(VehicleFlags flag) { return priority[(int)flag]; }
     bool IsAvailableSpace(const Vehicle& v) { return available_size > v.length; }
+    void clear();
 };
 
 #endif //EIT_QUEUE_H

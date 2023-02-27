@@ -115,6 +115,8 @@ int main(int argc, char* argv[]) {
             ImGui::EndCombo();
         }
         if (ImGui::Button("Embark")){
+            y.clear();
+            ferry.clear();
             y.SimulteQueueArrival(std::gamma_distribution(1.4, 1.5), 30);
             y.Embark(ferry);
         }

@@ -25,3 +25,9 @@ void Queue::EraseVehicleFromQueue(std::vector<Vehicle>::iterator& vehicle) {
     vehicles.erase(vehicle);
     total_vehicles--;
 }
+
+void Queue::clear() {
+    vehicles.clear();
+    total_vehicles = 0;
+    available_size = total_size;
+}
