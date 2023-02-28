@@ -116,6 +116,8 @@ void BasicRules::operator()(Ferry& ferry, Yard& yard, FileHandler& fh) {
         f_min_q->AddVehicleToQueue(std::move(*v));
         min_q->EraseVehicleFromQueue(v);
     }
+    ferry.FindCOM();
+    fh.Write(ferry);
 }
 
 /*
@@ -176,4 +178,116 @@ bool BasicRules::operator()(Yard& yard, Vehicle& vehicle) {
     }
     best_queue->AddVehicleToQueue(vehicle);
     return true;
+}
+
+struct FerryYardCombo {
+    Ferry f;
+    Yard y;
+    FerryYardCombo(Ferry f, Yard y) : f{f}, y{y} {}
+};
+
+void LoadReservedVehicles(Ferry& f, Yard& y) {
+    auto& queues = y.queues;
+    while (true) {
+        std::priority_queue<std::pair<int64_t, size_t>> queue_weight;
+        for (int i = 0; i < queues.size(); i++) {
+            int64_t vehicle_weight = 0;
+            auto& q = queues[i];
+            if (!q.vehicles.empty()) {
+                auto& v = q.vehicles.front();
+                if (v.GetFlag(VehicleFlags::Ambulance)) {
+                    vehicle_weight += 10000;
+                }
+                queue_weight.push({vehicle_weight, i});
+            }
+        }
+        if (queues[0].vehicles.empty()) {
+            break;
+        }
+        auto min_q = queues.begin() + queue_weight.top().second;
+        auto v = min_q->vehicles.begin();
+        auto first_queue = std::find_if(f.queues.begin(), f.queues.end(), [&](const Queue& q1) { return q1.available_size > v->length; });
+        if (first_queue == f.queues.end()) {
+            // error, return
+        }
+        auto f_min_q = std::max_element(first_queue, f.queues.end(), [](const Queue& q1, const Queue& q2) { return q1.available_size < q2.available_size; });
+        f_min_q->AddVehicleToQueue(std::move(*v));
+        min_q->EraseVehicleFromQueue(v);
+    }
+}
+
+bool CheckIfFullRow(std::vector<FerryYardCombo>& fyc) {
+    auto& to_consider = fyc.back();
+    int veh_num = to_consider.f.queues[0].total_vehicles;
+    for (auto& q : to_consider.f.queues) {
+        if (veh_num != q.total_vehicles) {
+            return false;
+        }
+    }
+    return true;
+}
+
+auto FindFullRowIterator(std::vector<FerryYardCombo>& fyc) {
+    auto it = fyc.end() - 1;
+    auto check_veh = fyc.back().f.queues[0].total_vehicles;
+    while (true) {
+        for (auto& f_q : it->f.queues) {
+            if (check_veh != f_q.total_vehicles) {
+                break;
+            }
+        }
+        it--;
+    }
+    return it;
+}
+
+double FerryObjectiveFunction(Ferry& ferry) {
+    double x = ferry.car_com.first, y = ferry.car_com.second, x0 = ferry.com.first, y0 = ferry.com.second;
+    return sqrt((x - x0) * (x - x0) + (y - y0) * (y - y0));
+}
+
+/*
+ * Fine-sorting for optimizing COM. This solution is basic at O(q^n), but I've implemented some
+ * restrictions. First, it handles ambulances and other priority vehicles. Then, once every row is
+ * filled, the best solution is picked and new solutions spring from it.
+ */
+void OptimizeCOM::operator()(Ferry& f, Yard& y, FileHandler& fh) {
+    // Handling priority vehicles. This is similar to the solution presented in BasicRules
+    LoadReservedVehicles(f, y);
+    std::vector<FerryYardCombo> solutions_vector;
+    solutions_vector.emplace_back(f, y);
+    int i = 0;
+    try {
+        for (; i < solutions_vector.size(); i++) {
+            auto fyc = solutions_vector[i]; // solution under consideration
+            const auto yard = fyc.y; // yard under consideration
+            const auto ferry = fyc.f; // ferry under consideration
+            for (int j = 0; j < yard.queues.size(); j++) {
+                for (int k = 0; k < ferry.queues.size(); k++) {
+                    Yard y_copy = yard; // copying
+                    Ferry f_copy = ferry;
+                    auto yard_queue = y_copy.queues.begin() + j;
+                    if (yard_queue->vehicles.empty()) continue; // if there are no vehicles in this yard queue, move to next
+                    auto v = yard_queue->vehicles.begin();
+                    auto y_c = yard_queue;
+                    auto f_c = f_copy.queues.begin() + k;
+                    f_c->AddVehicleToQueue(std::move(*v));
+                    y_c->EraseVehicleFromQueue(v);
+                    solutions_vector.push_back(std::move(FerryYardCombo{f_copy, y_copy}));
+                }
+            }
+            //std::cout << solutions_vector.size() << "\n";
+        }
+        if (CheckIfFullRow(solutions_vector)) {
+
+        }
+    }
+    catch (std::bad_array_new_length& e) {
+        e.what();
+    }
+    std::cout << "Finished" << "\n";
+}
+
+bool OptimizeCOM::operator()(Yard& yard, Vehicle& vehicle) {
+
 }

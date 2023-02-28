@@ -50,6 +50,12 @@ struct BasicRules : BaseAlgorithm{
     virtual std::string AlgorithmName() { return "Hard-coded ruleset"; }
 };
 
+struct OptimizeCOM : BaseAlgorithm{
+    void operator()(Ferry& ferry, Yard& yard, FileHandler& fh) override;
+    bool operator()(Yard& yard, Vehicle& vehicle) override;
+    virtual std::string AlgorithmName() { return "COM ruleset"; }
+};
+
 // Algorithm that does nothing, just for testing how the operator() overloading works
 // Also illustrative for how the operator() is supposed to be set up
 struct DoNothing : BaseAlgorithm {

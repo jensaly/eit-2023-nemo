@@ -9,13 +9,13 @@ struct BaseAlgorithm;
 struct Yard {
     std::vector<Queue> queues; // main yard area
     std::deque<Vehicle> pre_yard; // road leading up to yard
-    int vehicles_in_yard = 0;
-    std::unique_ptr<BaseAlgorithm> f_algorithm; // selected algorithm for fine sorting
-    std::unique_ptr<BaseAlgorithm> c_algorithm; // selected algorithm for sorting arriving cars
+    int total_vehicles = 0;
+    std::shared_ptr<BaseAlgorithm> f_algorithm; // selected algorithm for fine sorting
+    std::shared_ptr<BaseAlgorithm> c_algorithm; // selected algorithm for sorting arriving cars
     FileHandler fh{};
 
     template<class CoarseAlgorithm, class FineAlgorithm>
-    Yard(CoarseAlgorithm, FineAlgorithm, int number_of_queues, double queue_length, double queue_width) : f_algorithm{std::make_unique<FineAlgorithm>()}, c_algorithm{std::make_unique<CoarseAlgorithm>()} {
+    Yard(CoarseAlgorithm, FineAlgorithm, int number_of_queues, double queue_length, double queue_width) : f_algorithm{std::make_shared<FineAlgorithm>()}, c_algorithm{std::make_shared<CoarseAlgorithm>()} {
         for (int i = 0; i < number_of_queues; i++) {
             queues.emplace_back(std::to_string(i), queue_length, queue_width, queue_width * i);
         }
@@ -44,7 +44,7 @@ struct Yard {
             std::string plate_nr = std::string(1, ('A' + rand()%26)) + std::string(1,('A' + rand()%26));
             plate_nr += std::to_string(rand() % 10) + std::to_string(rand() % 10) + std::to_string(rand() % 10) + std::to_string(rand() % 10) + std::to_string(rand() % 10);
             Arrival(Vehicle("B", plate_nr, 4.18 * unif(generator), 1.72f * unif(generator), 1265 * unif(generator), t)); // defaulted to a Yaris Cross because no better data
-            vehicles_in_yard++;
+            total_vehicles++;
         }
     }
 
@@ -56,7 +56,7 @@ struct Yard {
     void clear() {
         for (auto& q : queues) q.clear();
         pre_yard.clear();
-        vehicles_in_yard = 0;
+        total_vehicles = 0;
     }
 
     template<typename CoarseAlgorithm> void SetCoarseAlgorithm() {

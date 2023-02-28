@@ -111,7 +111,7 @@ int main(int argc, char* argv[]) {
     // Main loop
     bool done = false;
     srand(time(NULL));
-    Yard y = Yard(BasicRules(), BasicRules(), 5, 60, 4);
+    Yard y = Yard(BasicRules(), OptimizeCOM(), 5, 60, 4);
     y.queues[0].SetReservedFlag(VehicleFlags::Ambulance);
     y.queues[0].SetReservedFlag(VehicleFlags::HC);
     y.queues[2].SetPriorityFlag(VehicleFlags::Heavy);
@@ -150,6 +150,7 @@ int main(int argc, char* argv[]) {
             if (ImGui::Selectable("Worst Fit")) { y.SetFineAlgorithm<WorstFit>(); }
             if (ImGui::Selectable("Best Fit")) { y.SetFineAlgorithm<BestFit>(); }
             if (ImGui::Selectable("Basic Rules")) { y.SetFineAlgorithm<BasicRules>(); }
+            if (ImGui::Selectable("Optimize COM")) { y.SetFineAlgorithm<OptimizeCOM>(); }
             ImGui::EndCombo();
         }
         if (state == 0 && ImGui::Button("Generate cars")) {

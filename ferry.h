@@ -9,6 +9,7 @@ struct Ferry {
     double length;
     std::pair<float, float> car_com{0,0};
     std::pair<float, float> com{0,0};
+    int total_vehicles = 0;
 
     Ferry(int queues, double q_height, double q_width, double width, double height);
     void FindCOM();
