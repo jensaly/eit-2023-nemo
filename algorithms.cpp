@@ -130,26 +130,37 @@ void BasicRules::operator()(Ferry& ferry, Yard& yard, FileHandler& fh) {
  */
 bool BasicRules::operator()(Yard& yard, Vehicle& vehicle) {
     auto& queues = yard.queues;
-    std::priority_queue<std::pair<int64_t, size_t>> queue_weight;
+    std::priority_queue<std::pair<double, size_t>> queue_weight;
     for (int i = 0; i < queues.size(); i++) {
         auto& q = queues[i];
-        int64_t vehicle_weight = 2;
+        double vehicle_weight = 0;
+        /*
+         * We check if a vehicle has reserved status in a queue
+         * If it does, we give it a weighted sum.
+         * If it does not, we deduct a sum.
+         */
+        int reserved_matches = 0;
+        int priority_matches = 0;
         for (int j = 0; j < q.reserved.size(); j++) {
-            if (vehicle.characteristics[j] && q.reserved[j]) {
-                vehicle_weight += 10000;
-            }
-            else if (!vehicle.characteristics[j] && q.reserved[j]) {
-                vehicle_weight -= 10000;
-            }
-
-            if (vehicle.characteristics[j] && q.priority[j]) {
-                vehicle_weight += 3;
-            }
-            else if (!vehicle.characteristics[j] && q.priority[j]) {
-                vehicle_weight += 1;
+            if (vehicle.characteristics[j] && q.reserved[j]) { // if the queue's reserved status matches the vehicle
+                reserved_matches++;
             }
         }
-        queue_weight.push(std::pair<uint64_t, size_t>(vehicle_weight * q.available_size, i));
+        for (int j = 0; j < q.reserved.size(); j++) {
+            if (vehicle.characteristics[j] && q.priority[j]) { // if the queue's priority status matches the vehicle
+                priority_matches++;
+            }
+        }
+        if (q.has_reserved) {
+            vehicle_weight = (reserved_matches > 0) ? reserved_matches * 10000 : -10000;
+        }
+        if (q.has_priority) {
+            vehicle_weight = (priority_matches > 0) ? priority_matches : -1;
+        }
+        if (vehicle_weight == 0) { // normal car in a normal queue, pick the one with most available space
+            vehicle_weight = q.available_size / q.total_size;
+        }
+        queue_weight.push(std::pair<double, size_t>(vehicle_weight, i));
     }
     auto best = queue_weight.top();
     auto best_queue = &queues[best.second];

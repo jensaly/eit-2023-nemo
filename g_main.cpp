@@ -1,6 +1,42 @@
 #include "g_utility.h"
 #include "yard.h"
 
+void PlotQueues(Ferry& ferry) {
+    for (int i = 0; i < ferry.queues.size(); i++) {
+        auto& q = ferry.queues[i];
+        for (int j = 0; j < ferry.queues[i].vehicles.size(); j++) {
+            auto& v = q.vehicles[j];
+            ImVec2 bottom = ImPlot::PlotToPixels(ImVec2(v.x, v.y));
+            ImVec2 top = ImPlot::PlotToPixels(ImVec2(v.x + v.length, v.y + v.width));
+            ImPlot::GetPlotDrawList()->AddRectFilled(bottom, top, ImGui::ColorConvertFloat4ToU32(ImVec4(v.col[0], v.col[1], v.col[2], v.col[3])));
+        }
+        double xvals[2] = {0, q.total_size};
+        double yvals[2] = {q.width * (i+1), q.width * (i+1)};
+        ImPlot::PlotLine(("Line " + std::to_string(i)).c_str(), xvals, yvals, 2);
+        float car_x = ferry.car_com.first, car_y = ferry.car_com.second;
+        ImPlot::PlotScatter("Car COM", &car_x, &car_y, 1);
+        float x = ferry.com.first, y = ferry.com.second;
+        ImPlot::PlotScatter("COM", &x, &y, 1);
+    }
+    ImPlot::EndPlot();
+}
+
+void PlotQueues(Yard& yard) {
+    for (int i = 0; i < yard.queues.size(); i++) {
+        auto& q = yard.queues[i];
+        for (int j = 0; j < yard.queues[i].vehicles.size(); j++) {
+            auto& v = q.vehicles[j];
+            ImVec2 bottom = ImPlot::PlotToPixels(ImVec2(v.x, v.y));
+            ImVec2 top = ImPlot::PlotToPixels(ImVec2(v.x + v.length, v.y + v.width));
+            ImPlot::GetPlotDrawList()->AddRectFilled(bottom, top, ImGui::ColorConvertFloat4ToU32(ImVec4(v.col[0], v.col[1], v.col[2], v.col[3])));
+        }
+        double xvals[2] = {0, q.total_size};
+        double yvals[2] = {q.width * (i+1), q.width * (i+1)};
+        ImPlot::PlotLine(("Line " + std::to_string(i)).c_str(), xvals, yvals, 2);
+    }
+    ImPlot::EndPlot();
+}
+
 int main(int argc, char* argv[]) {
     // Setup SDL
     // (Some versions of SDL before <2.0.10 appears to have performance/stalling issues on a minority of Windows systems,
@@ -80,6 +116,7 @@ int main(int argc, char* argv[]) {
     y.queues[0].SetReservedFlag(VehicleFlags::HC);
     y.queues[2].SetPriorityFlag(VehicleFlags::Heavy);
     Ferry ferry{5, 17.8, 1.9, 5 * 1.9, 18.0};
+    int state = 0; // 0 is no cars, 1 is cars in yard, 2 is cars in ferry
     while (!done)
     {
         // Poll and handle events (inputs, window resize, etc.)
@@ -112,34 +149,23 @@ int main(int argc, char* argv[]) {
         if (ImGui::BeginCombo("Fine Algorithm", y.f_algorithm->AlgorithmName().c_str())) {
             if (ImGui::Selectable("Worst Fit")) { y.SetFineAlgorithm<WorstFit>(); }
             if (ImGui::Selectable("Best Fit")) { y.SetFineAlgorithm<BestFit>(); }
+            if (ImGui::Selectable("Basic Rules")) { y.SetFineAlgorithm<BasicRules>(); }
             ImGui::EndCombo();
         }
-        if (ImGui::Button("Embark")){
+        if (state == 0 && ImGui::Button("Generate cars")) {
             y.clear();
             ferry.clear();
-            y.SimulteQueueArrival(std::gamma_distribution(1.4, 1.5), 30);
+            y.SimulteQueueArrival(std::gamma_distribution(1.4, 1.5), 60);
+            state = 1;
+        }
+        else if (state == 1 && ImGui::Button("Embark")) {
             y.Embark(ferry);
+            state = 0;
         }
         if (ImPlot::BeginPlot("Cars", ImVec2(-1, -1), ImPlotFlags_AntiAliased | ImPlotFlags_Equal)) {
-            for (int i = 0; i < ferry.queues.size(); i++) {
-                auto& q = ferry.queues[i];
-                for (int j = 0; j < ferry.queues[i].vehicles.size(); j++) {
-                    auto& v = q.vehicles[j];
-                    ImVec2 bottom = ImPlot::PlotToPixels(ImVec2(v.x, v.y));
-                    ImVec2 top = ImPlot::PlotToPixels(ImVec2(v.x + v.length, v.y + v.width));
-                    ImPlot::GetPlotDrawList()->AddRectFilled(bottom, top, ImGui::ColorConvertFloat4ToU32(ImVec4(v.col[0], v.col[1], v.col[2], v.col[3])));
-                }
-                double xvals[2] = {0, q.total_size};
-                double yvals[2] = {q.width * (i+1), q.width * (i+1)};
-                ImPlot::PlotLine(("Line " + std::to_string(i)).c_str(), xvals, yvals, 2);
-                float car_x = ferry.car_com.first, car_y = ferry.car_com.second;
-                ImPlot::PlotScatter("Car COM", &car_x, &car_y, 1);
-                float x = ferry.com.first, y = ferry.com.second;
-                ImPlot::PlotScatter("COM", &x, &y, 1);
-            }
-            ImPlot::EndPlot();
+            if (state == 1) PlotQueues(y);
+            else PlotQueues(ferry);
         }
-
         ImGui::End();
 
 
