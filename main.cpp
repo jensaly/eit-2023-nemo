@@ -2,6 +2,7 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <curl/curl.h>
+#include "fetchVehicleData.h"
 
 
 int main() {
@@ -14,7 +15,5 @@ int main() {
     y.SimulteQueueArrival(std::gamma_distribution(1.4, 1.5), 60);
     y.Embark(ferry);
 
-    CURL *curl;
-    CURLcode res;
-    curl_global_cleanup();
+    Make_curl_request();
 }
