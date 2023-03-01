@@ -7,8 +7,8 @@ struct Queue {
     std::string name;
     uint64_t flags = 0;
     float available_size;
-    const float total_size;
-    const float width;
+    float total_size;
+    float width;
     uint16_t total_vehicles = 0;
     float y;
     std::vector<bool> reserved; // lane is reserved exclusively for certain types of vehicle
@@ -19,8 +19,20 @@ struct Queue {
     std::vector<Vehicle> vehicles;
 
     Queue(std::string name, float size, float width, float y, std::initializer_list<VehicleFlags> reserved_flags = {}, std::initializer_list<VehicleFlags> priority_flags = {});
-    void AddVehicleToQueue(Vehicle vehicle);
-    void EraseVehicleFromQueue(std::vector<Vehicle>::iterator& vehicle);
+    template<typename T> void AddVehicleToQueue(Vehicle vehicle, T& t) {
+        vehicle.y = y + (width - vehicle.width) / 2;
+        vehicle.x = total_size - available_size;
+        available_size -= vehicle.length;
+        vehicles.push_back(vehicle);
+        total_vehicles++;
+        t.total_vehicles++;
+    }
+    template<typename T> void EraseVehicleFromQueue(std::vector<Vehicle>::iterator& vehicle, T& t)  {
+        available_size += vehicle->length;
+        vehicles.erase(vehicle);
+        total_vehicles--;
+        t.total_vehicles++;
+    }
     void SetReservedFlag(VehicleFlags flag) { reserved[(int)flag] = true; has_reserved = true; }
     void UnsetReservedFlag(VehicleFlags flag) { reserved[(int)flag] = false; }
     bool GetReservedFlag(VehicleFlags flag) { return reserved[(int)flag]; }

@@ -12,20 +12,6 @@ Queue::Queue(std::string name, float size, float width, float y, std::initialize
     }
 }
 
-void Queue::AddVehicleToQueue(Vehicle vehicle) {
-    vehicle.y = y + (width - vehicle.width) / 2;
-    vehicle.x = total_size - available_size;
-    available_size -= vehicle.length;
-    vehicles.push_back(vehicle);
-    total_vehicles++;
-}
-
-void Queue::EraseVehicleFromQueue(std::vector<Vehicle>::iterator& vehicle) {
-    available_size += vehicle->length;
-    vehicles.erase(vehicle);
-    total_vehicles--;
-}
-
 void Queue::clear() {
     vehicles.clear();
     total_vehicles = 0;
