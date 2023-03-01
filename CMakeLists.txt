@@ -7,7 +7,7 @@ find_package(CURL)
 
 set(CMAKE_CXX_STANDARD 20)
 
-if (SDL2_FOUND)
+if (SDL_FOUND)
     find_package(OpenGL)
     set(SOURCES g_main.cpp vehicle.cpp yard.cpp ferry.cpp algorithms.cpp queue.cpp)
     set(HEADERS utility.h vehicle.h yard.h g_utility.h ferry.h algorithms.h FileHandler.h filehandler.cpp queue.h)
@@ -20,7 +20,7 @@ if (SDL2_FOUND)
 
     add_executable(eit_graphical ${SOURCES} ${HEADERS} ${IMGUI_SRC})
 
-    target_link_libraries(eit_graphical PUBLIC ${SDL2_LIBRARIES} ${OPENGL_LIBRARIES} ${CURL_LIBRARIES})
+    target_link_libraries(eit_graphical PUBLIC sdl2 ${OPENGL_LIBRARIES} curl)
 
     target_sources( eit_graphical
             PUBLIC
@@ -44,5 +44,5 @@ else()
     set(HEADERS utility.h vehicle.h yard.h ferry.h algorithms.h FileHandler.h filehandler.cpp queue.h)
     add_executable(eit ${SOURCES} ${HEADERS})
 
-    target_link_libraries(eit PUBLIC ${CURL_LIBRARY})
+    target_link_libraries(eit PUBLIC curl)
 endif ()
