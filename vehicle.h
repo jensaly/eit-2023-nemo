@@ -19,7 +19,6 @@ struct Vehicle {
     float x = 0; // bottom left corner placement
     float y = 0;
     float buf;
-    float vehicle_half_buff = 0.15; // lengthwise clearance between vehicles
     float col[4]; // car color, used in part by the graphical side
     std::vector<bool> characteristics; // characteristics of a vehicle
 

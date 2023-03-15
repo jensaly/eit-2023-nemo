@@ -5,8 +5,7 @@
 
 //typedef std::ranges::drop_view<std::ranges::ref_view<std::vector<Queue>>> vecrange;
 
-void WorstFit::operator()(Ferry& ferry, Yard& yard, FileHandler& fh) {
-    //auto a = yard.queues | std::views::drop(2);
+void WorstFit::operator()(Ferry& ferry, Yard& yard, FileHandler& fh, std::vector<size_t> f_par, std::vector<size_t> y_par) {
     auto& queues = yard.queues;
     while (true) {
         // Find first available car, if no cars available all are sorted
@@ -47,7 +46,7 @@ bool WorstFit::operator()(Yard& yard, Vehicle& vehicle) {
     return true;
 }
 
-void BestFit::operator()(Ferry& ferry, Yard& yard, FileHandler& fh) {
+void BestFit::operator()(Ferry& ferry, Yard& yard, FileHandler& fh, std::vector<size_t> f_par, std::vector<size_t> y_par) {
     auto& queues = yard.queues;
     while (true) {
         // Find first available car, if no cars available all are sorted
@@ -89,9 +88,9 @@ bool BestFit::operator()(Yard& yard, Vehicle& vehicle) {
 }
 
 /*
- * Ambulances have highest priority, will all be boarded first
+ * Ambulances have the highest priority, will all be boarded first
  */
-void BasicRules::operator()(Ferry& ferry, Yard& yard, FileHandler& fh) {
+void BasicRules::operator()(Ferry& ferry, Yard& yard, FileHandler& fh, std::vector<size_t> f_par, std::vector<size_t> y_par) {
     auto& queues = yard.queues;
     while (true) {
         std::priority_queue<std::pair<int64_t, size_t>> queue_weight;
@@ -237,7 +236,7 @@ void FindPresentBest(std::vector<FerryYardCombo>& fyc) {
  * restrictions. First, it handles ambulances and other priority vehicles. Then, once every row is
  * filled, the best solution is picked and new solutions spring from it.
  */
-void OptimizeCOM::operator()(Ferry& f, Yard& y, FileHandler& fh) {
+void OptimizeCOM::operator()(Ferry& f, Yard& y, FileHandler& fh, std::vector<size_t> f_par, std::vector<size_t> y_par) {
     // Handling priority vehicles. This is similar to the solution presented in BasicRules
     LoadReservedVehicles(f, y);
     std::vector<FerryYardCombo> solutions_vector;
@@ -277,4 +276,43 @@ void OptimizeCOM::operator()(Ferry& f, Yard& y, FileHandler& fh) {
 
 bool OptimizeCOM::operator()(Yard& yard, Vehicle& vehicle) {
 
+}
+
+
+void WorstFitParallel::operator()(Ferry& ferry, Yard& yard, FileHandler& fh, std::vector<size_t> f_par, std::vector<size_t> y_par) {
+    auto& queues = yard.queues;
+    auto y_first = queues.begin();
+    auto y_second = queues.end() - 1;
+    auto f_first = ferry.queues.begin();
+    auto f_second = ferry.queues.end() - 1;
+    while (true) {
+        while (true) {
+            if (y_first->vehicles.empty() && y_second->vehicles.empty()) {
+                break;
+            }
+            auto v_first = y_first->vehicles.begin();
+            auto v_second = y_second->vehicles.begin();
+            if (!y_first->vehicles.empty()) {
+                f_first->AddVehicleToQueue(std::move(*v_first), ferry);
+                y_first->EraseVehicleFromQueue(v_first, yard);
+            }
+            if (!y_second->vehicles.empty() && &*y_first != &*y_second) {
+                f_second->AddVehicleToQueue(std::move(*v_second), ferry);
+                y_second->EraseVehicleFromQueue(v_second, yard);
+            }
+        }
+        y_first++;
+        y_second--;
+        f_first++;
+        f_second--;
+        if (y_first > y_second) {
+            break;
+        }
+    }
+    ferry.FindCOM();
+    fh.Write(ferry);
+}
+// Coarse-sorting version of WorstFit algorithm, individual car arrival into queues
+bool WorstFitParallel::operator()(Yard& yard, Vehicle& vehicle) {
+    worstfit(yard, vehicle);
 }

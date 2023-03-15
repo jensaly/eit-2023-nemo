@@ -111,11 +111,11 @@ int main(int argc, char* argv[]) {
     // Main loop
     bool done = false;
     srand(time(NULL));
-    Yard y = Yard(BasicRules(), OptimizeCOM(), 5, 60, 4);
+    Yard y = Yard(BasicRules(), WorstFitParallel(), 6, 90, 3);
     y.queues[0].SetReservedFlag(VehicleFlags::Ambulance);
     y.queues[0].SetReservedFlag(VehicleFlags::HC);
     y.queues[2].SetPriorityFlag(VehicleFlags::Heavy);
-    Ferry ferry{5, 17.8, 1.9, 5 * 1.9, 18.0};
+    Ferry ferry{6, 130, 3.4, 20.7, 130}; // 130m lengde, 20.7m bredde
     int state = 0; // 0 is no cars, 1 is cars in yard, 2 is cars in ferry
     while (!done)
     {
@@ -144,6 +144,7 @@ int main(int argc, char* argv[]) {
             if (ImGui::Selectable("Worst Fit")) { y.SetCoarseAlgorithm<WorstFit>(); }
             if (ImGui::Selectable("Best Fit")) { y.SetCoarseAlgorithm<BestFit>(); }
             if (ImGui::Selectable("Basic Rules")) { y.SetCoarseAlgorithm<BasicRules>(); }
+            if (ImGui::Selectable("Parallel worst fit")) { y.SetCoarseAlgorithm<WorstFitParallel>(); }
             ImGui::EndCombo();
         }
         if (ImGui::BeginCombo("Fine Algorithm", y.f_algorithm->AlgorithmName().c_str())) {
@@ -151,6 +152,7 @@ int main(int argc, char* argv[]) {
             if (ImGui::Selectable("Best Fit")) { y.SetFineAlgorithm<BestFit>(); }
             if (ImGui::Selectable("Basic Rules")) { y.SetFineAlgorithm<BasicRules>(); }
             if (ImGui::Selectable("Optimize COM")) { y.SetFineAlgorithm<OptimizeCOM>(); }
+            if (ImGui::Selectable("Parallel worst fit")) { y.SetFineAlgorithm<WorstFitParallel>(); }
             ImGui::EndCombo();
         }
         if (state == 0 && ImGui::Button("Generate cars")) {
