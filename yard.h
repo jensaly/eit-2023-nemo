@@ -36,14 +36,14 @@ struct Yard {
     // Also uses a random generator for plate_nr at this time
     template<typename T> void SimulteQueueArrival(T distribution, double time)  {
         static std::mt19937 generator{std::random_device{}()};
-        static std::uniform_real_distribution unif(0.9, 1.1);
+        static std::uniform_real_distribution<double> unif(0.9, 1.1);
         double t = 0;
         while (t < time) {
             double dt = distribution(generator);
             t += dt;
             std::string plate_nr = std::string(1, ('A' + rand()%26)) + std::string(1,('A' + rand()%26));
             plate_nr += std::to_string(rand() % 10) + std::to_string(rand() % 10) + std::to_string(rand() % 10) + std::to_string(rand() % 10) + std::to_string(rand() % 10);
-            Arrival(Vehicle("B", plate_nr, 4.18 * unif(generator), 1.72f * unif(generator), 1265 * unif(generator), t)); // defaulted to a Yaris Cross because no better data
+            Arrival(Vehicle("B", plate_nr, 4.18 * unif(generator), 1.72f * unif(generator), 1265 * unif(generator), 0.5, t)); // defaulted to a Yaris Cross because no better data
             total_vehicles++;
         }
     }

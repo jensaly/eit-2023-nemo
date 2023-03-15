@@ -3,7 +3,10 @@
 #include "filehandler.h"
 #include "yard.h"
 
+//typedef std::ranges::drop_view<std::ranges::ref_view<std::vector<Queue>>> vecrange;
+
 void WorstFit::operator()(Ferry& ferry, Yard& yard, FileHandler& fh) {
+    //auto a = yard.queues | std::views::drop(2);
     auto& queues = yard.queues;
     while (true) {
         // Find first available car, if no cars available all are sorted

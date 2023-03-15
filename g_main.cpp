@@ -156,7 +156,7 @@ int main(int argc, char* argv[]) {
         if (state == 0 && ImGui::Button("Generate cars")) {
             y.clear();
             ferry.clear();
-            y.SimulteQueueArrival(std::gamma_distribution(1.4, 1.5), 60);
+            y.SimulteQueueArrival(std::gamma_distribution<double>(1.4, 1.5), 60);
             state = 1;
         }
         else if (state == 1 && ImGui::Button("Embark")) {
@@ -168,7 +168,6 @@ int main(int argc, char* argv[]) {
             else PlotQueues(ferry);
         }
         ImGui::End();
-
 
         // Rendering
         ImGui::Render();

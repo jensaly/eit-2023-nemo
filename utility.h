@@ -13,6 +13,8 @@
 #include <fstream>
 #include <initializer_list>
 #include <map>
+#include <memory>
+#include <ranges>
 
 #include <curl/curl.h>
 
