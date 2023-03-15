@@ -9,6 +9,6 @@
 #include <iostream>
 #include <string>
 
-void Make_curl_request();
+void Make_curl_request(const std::string& car_ID);
 
 #endif //EIT_FETCHVEHICLEDATA_H

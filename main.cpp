@@ -15,5 +15,9 @@ int main() {
     y.SimulteQueueArrival(std::gamma_distribution(1.4, 1.5), 60);
     y.Embark(ferry);
 
-    Make_curl_request();
+    //std::string car_ID = "EB11111";
+    //std::string car_ID = "DN33104";
+    std::string car_ID = "EL93214";
+
+    Make_curl_request(car_ID);
 }
