@@ -9,7 +9,7 @@ struct FileHandler;
 struct Ferry;
 
 struct BaseAlgorithm {
-    virtual void operator()(Ferry& ferry, Yard& yard, FileHandler& fh, std::vector<size_t> f_par = {0}, std::vector<size_t> y_par = {0}) = 0;
+    virtual void operator()(Ferry& ferry, Yard& yard, FileHandler& fh, std::vector<std::pair<size_t, size_t>> y_f_parallel = {}) = 0;
     virtual bool operator()(Yard& yard, Vehicle& vehicle) = 0;
     virtual std::string AlgorithmName() { return "Unset"; }
 };
@@ -26,7 +26,7 @@ struct BaseAlgorithm {
  */
 struct WorstFit : BaseAlgorithm {
     // Fine-sorting version of WorstFit algorithm, from Yard queues to Ferry queues
-    void operator()(Ferry& ferry, Yard& yard, FileHandler& fh, std::vector<size_t> f_par = {0}, std::vector<size_t> y_par = {0}) override;
+    void operator()(Ferry& ferry, Yard& yard, FileHandler& fh, std::vector<std::pair<size_t, size_t>> y_f_parallel = {}) override;
     // Coarse-sorting version of WorstFit algorithm, individual car arrival into queues
     bool operator()(Yard& yard, Vehicle& vehicle) override;
     virtual std::string AlgorithmName() { return "Worst fit"; }
@@ -38,20 +38,20 @@ struct WorstFit : BaseAlgorithm {
  */
 struct BestFit : BaseAlgorithm{
     // Fine-sorting version of WorstFit algorithm, from Yard queues to Ferry queues
-    void operator()(Ferry& ferry, Yard& yard, FileHandler& fh, std::vector<size_t> f_par = {0}, std::vector<size_t> y_par = {0}) override;
+    void operator()(Ferry& ferry, Yard& yard, FileHandler& fh, std::vector<std::pair<size_t, size_t>> y_f_parallel = {}) override;
     // Coarse-sorting version of WorstFit algorithm, individual car arrival into queues
     bool operator()(Yard& yard, Vehicle& vehicle) override;
     virtual std::string AlgorithmName() { return "Best fit"; }
 };
 
 struct BasicRules : BaseAlgorithm{
-    void operator()(Ferry& ferry, Yard& yard, FileHandler& fh, std::vector<size_t> f_par = {0}, std::vector<size_t> y_par = {0}) override;
+    void operator()(Ferry& ferry, Yard& yard, FileHandler& fh, std::vector<std::pair<size_t, size_t>> y_f_parallel = {}) override;
     bool operator()(Yard& yard, Vehicle& vehicle) override;
     virtual std::string AlgorithmName() { return "Hard-coded ruleset"; }
 };
 
 struct OptimizeCOM : BaseAlgorithm{
-    void operator()(Ferry& ferry, Yard& yard, FileHandler& fh, std::vector<size_t> f_par = {0}, std::vector<size_t> y_par = {0}) override;
+    void operator()(Ferry& ferry, Yard& yard, FileHandler& fh, std::vector<std::pair<size_t, size_t>> y_f_parallel = {}) override;
     bool operator()(Yard& yard, Vehicle& vehicle) override;
     virtual std::string AlgorithmName() { return "COM ruleset"; }
 };
@@ -59,7 +59,7 @@ struct OptimizeCOM : BaseAlgorithm{
 // Algorithm that does nothing, just for testing how the operator() overloading works
 // Also illustrative for how the operator() is supposed to be set up
 struct DoNothing : BaseAlgorithm {
-    void operator()(Ferry& ferry, Yard& yard, FileHandler& fh, std::vector<size_t> f_par = {0}, std::vector<size_t> y_par = {0}) override {};
+    void operator()(Ferry& ferry, Yard& yard, FileHandler& fh, std::vector<std::pair<size_t, size_t>> y_f_parallel = {}) override {};
     bool operator()(Yard& yard, Vehicle& vehicle) override { return false; }
     virtual std::string AlgorithmName() { return "Do nothing"; }
 };
@@ -68,7 +68,7 @@ struct DoNothing : BaseAlgorithm {
 // Also illustrative for how the operator() is supposed to be set up
 struct WorstFitParallel : BaseAlgorithm {
     WorstFit worstfit;
-    void operator()(Ferry& ferry, Yard& yard, FileHandler& fh, std::vector<size_t> f_par = {0}, std::vector<size_t> y_par = {0}) override;
+    void operator()(Ferry& ferry, Yard& yard, FileHandler& fh, std::vector<std::pair<size_t, size_t>> y_f_parallel = {}) override;
     bool operator()(Yard& yard, Vehicle& vehicle) override;
     virtual std::string AlgorithmName() { return "Parallel worst fit"; }
 };

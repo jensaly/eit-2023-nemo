@@ -30,7 +30,7 @@ struct Queue {
             real_x = veh.x + veh.length + veh.buf;
             vehicle.x = real_x;
         }
-        available_size -= real_x;
+        available_size = total_size - real_x;
         vehicles.push_back(vehicle);
         total_vehicles++;
         t.total_vehicles++;

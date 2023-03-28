@@ -114,9 +114,12 @@ int main(int argc, char* argv[]) {
     Yard y = Yard(BasicRules(), WorstFitParallel(), 6, 90, 3);
     y.queues[0].SetReservedFlag(VehicleFlags::Ambulance);
     y.queues[0].SetReservedFlag(VehicleFlags::HC);
-    y.queues[2].SetPriorityFlag(VehicleFlags::Heavy);
+    y.queues[2].SetReservedFlag(VehicleFlags::Heavy);
+    y.queues[3].SetReservedFlag(VehicleFlags::Heavy);
+    y.queues[5].SetPriorityFlag(VehicleFlags::Electric);
     Ferry ferry{6, 130, 3.4, 20.7, 130}; // 130m lengde, 20.7m bredde
     int state = 0; // 0 is no cars, 1 is cars in yard, 2 is cars in ferry
+    double time = 120;
     while (!done)
     {
         // Poll and handle events (inputs, window resize, etc.)
@@ -155,22 +158,101 @@ int main(int argc, char* argv[]) {
             if (ImGui::Selectable("Parallel worst fit")) { y.SetFineAlgorithm<WorstFitParallel>(); }
             ImGui::EndCombo();
         }
+        static std::vector<std::pair<size_t, size_t>> y_f_parallel;
+        if (y_f_parallel.empty()) {
+            for (size_t i = 0; i < ferry.queues.size(); i++) {
+                y_f_parallel.push_back({i,i});
+            }
+        }
+        for (size_t i = 0; i < y.queues.size(); i++) {
+            ImGui::Text(("Yard queue " + std::to_string(i) + " connects to ferry queue:").c_str());
+            ImGui::SameLine();
+            ImGui::SetNextItemWidth(100);
+            if (ImGui::BeginCombo(("##" + std::to_string(i)).c_str(), std::to_string(y_f_parallel[i].second).c_str())) {
+                for (size_t j = 0; j < y_f_parallel.size(); j++) {
+                    if (ImGui::Selectable(std::to_string(j).c_str())) {
+                        y_f_parallel[i].second = j;
+                    }
+                }
+                ImGui::EndCombo();
+            }
+
+        }
         if (state == 0 && ImGui::Button("Generate cars")) {
             y.clear();
             ferry.clear();
-            y.SimulteQueueArrival(std::gamma_distribution<double>(1.4, 1.5), 60);
+            y.SimulateQueueArrival(time);
             state = 1;
         }
         else if (state == 1 && ImGui::Button("Embark")) {
-            y.Embark(ferry);
+            y.Embark(ferry, y_f_parallel);
             state = 0;
         }
+        ImGui::SameLine();
+        ImGui::InputDouble("Generation time", &time);
         if (ImPlot::BeginPlot("Cars", ImVec2(-1, -1), ImPlotFlags_AntiAliased | ImPlotFlags_Equal)) {
             if (state == 1) PlotQueues(y);
             else PlotQueues(ferry);
         }
         ImGui::End();
-
+        ImGui::Begin("Queue editing");
+        static int selected_queue = -1;
+        if (ImGui::BeginCombo("Selected yard queue to edit", std::to_string(selected_queue).c_str())) {
+            for (size_t i = 0; i < y.queues.size(); i++) {
+                if (ImGui::Selectable(std::to_string(i).c_str())) {
+                    selected_queue = i;
+                }
+            }
+            ImGui::EndCombo();
+        }
+        if (selected_queue != -1) {
+            auto &q = y.queues[selected_queue];
+            auto selected_flag = VehicleFlags::Ambulance;
+            ImGui::SetNextItemWidth(100);
+            if (ImGui::BeginCombo("Select type", vfstr(selected_flag).c_str())) {
+                if (ImGui::Selectable(vfstr(VehicleFlags::Ambulance).c_str())) selected_flag = VehicleFlags::Ambulance;
+                if (ImGui::Selectable(vfstr(VehicleFlags::HC).c_str())) selected_flag = VehicleFlags::HC;
+                if (ImGui::Selectable(vfstr(VehicleFlags::Heavy).c_str())) selected_flag = VehicleFlags::Heavy;
+                if (ImGui::Selectable(vfstr(VehicleFlags::Electric).c_str())) selected_flag = VehicleFlags::Electric;
+                ImGui::EndCombo();
+            }
+            ImGui::SameLine();
+            if (q.GetPriorityFlag(selected_flag)) {
+                if (ImGui::Button("Unset priority")) {
+                    q.UnsetPriorityFlag(selected_flag);
+                }
+            } else {
+                if (ImGui::Button("Set priority")) {
+                    q.UnsetReservedFlag(selected_flag);
+                    q.SetPriorityFlag(selected_flag);
+                }
+            }
+            ImGui::SameLine();
+            if (q.GetReservedFlag(selected_flag)) {
+                if (ImGui::Button("Unset reserved")) {
+                    q.UnsetReservedFlag(selected_flag);
+                }
+            } else {
+                if (ImGui::Button("Set reserved")) {
+                    q.UnsetPriorityFlag(selected_flag);
+                    q.SetReservedFlag(selected_flag);
+                }
+            }
+            ImGui::Text("Reserved status");
+            for (auto e = VehicleFlags::Ambulance; e != VehicleFlags::End; ++e) {
+                if (q.GetReservedFlag(e)) {
+                    ImGui::Text(vfstr(e).c_str());
+                }
+            }
+            ImGui::Text("");
+            ImGui::Text("Priority status");
+            for (auto e = VehicleFlags::Ambulance; e != VehicleFlags::End; ++e) {
+                if (q.GetPriorityFlag(e)) {
+                    ImGui::Text(vfstr(e).c_str());
+                }
+            }
+        }
+        ImGui::End();
         // Rendering
         ImGui::Render();
         glViewport(0, 0, (int)io.DisplaySize.x, (int)io.DisplaySize.y);
