@@ -168,7 +168,14 @@ int main(int argc, char* argv[]) {
             ImGui::Text(("Yard queue " + std::to_string(y_f_parallel[i].first) + " connects to ferry queues:").c_str());
             for (size_t j = 0; j < y_f_parallel[i].second.size(); j++) {
                 ImGui::SameLine();
-                ImGui::Text(std::to_string(y_f_parallel[i].second[j]).c_str());
+                //ImGui::Text(std::to_string(y_f_parallel[i].second[j]).c_str());
+                ImGui::SetNextItemWidth(100);
+                if (ImGui::BeginCombo(("##" + std::to_string(y_f_parallel[i].first)).c_str(), std::to_string(y_f_parallel[i].second[j]).c_str())) {
+                    for (int k = 0; k < ferry.queues.size(); k++) {
+                        if (ImGui::Selectable(std::to_string(k).c_str())) y_f_parallel[i].second[j] = k;
+                    }
+                    ImGui::EndCombo();
+                }
             }
         }
         if (state == 0 && ImGui::Button("Generate cars")) {
@@ -200,7 +207,7 @@ int main(int argc, char* argv[]) {
         }
         if (selected_queue != -1) {
             auto &q = y.queues[selected_queue];
-            auto selected_flag = VehicleFlags::Ambulance;
+            static auto selected_flag = VehicleFlags::Ambulance;
             ImGui::SetNextItemWidth(100);
             if (ImGui::BeginCombo("Select type", vfstr(selected_flag).c_str())) {
                 if (ImGui::Selectable(vfstr(VehicleFlags::Ambulance).c_str())) selected_flag = VehicleFlags::Ambulance;

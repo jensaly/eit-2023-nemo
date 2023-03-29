@@ -306,7 +306,9 @@ void WorstFitParallel::operator()(Ferry& ferry, Yard& yard, FileHandler& fh, std
     Yard yard_cpy{yard};
     // Ambulances override existing rules and load first, alone, and immediately to the first row, if possible.
     auto it = std::find_if(yard.queues.begin(), yard.queues.end(), [](const Queue& q){ return q.GetReservedFlag(VehicleFlags::Ambulance); });
-    LoadHighPriorityEvenly(*it, ferry, yard);
+    if (it != yard.queues.end()) {
+        LoadHighPriorityEvenly(*it, ferry, yard);
+    }
     if (y_f_parallel.empty()) {
         for (size_t i = 0; i < ferry.queues.size(); i++) {
             y_f_parallel.push_back({i,{i}});

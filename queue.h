@@ -42,10 +42,10 @@ struct Queue {
         t.total_vehicles++;
     }
     void SetReservedFlag(VehicleFlags flag) { reserved[(int)flag] = true; has_reserved = true; }
-    void UnsetReservedFlag(VehicleFlags flag) { reserved[(int)flag] = false; }
+    void UnsetReservedFlag(VehicleFlags flag) { reserved[(int)flag] = false; if (std::all_of(reserved.begin(), reserved.end(), [](const bool& b){ return !b; })) { has_reserved = false; } }
     bool GetReservedFlag(VehicleFlags flag) const { return reserved[(int)flag]; }
     void SetPriorityFlag(VehicleFlags flag) { priority[(int)flag] = true; has_priority = true; }
-    void UnsetPriorityFlag(VehicleFlags flag) { priority[(int)flag] = false; }
+    void UnsetPriorityFlag(VehicleFlags flag) { priority[(int)flag] = false; if (std::all_of(priority.begin(), priority.end(), [](const bool& b){ return !b; })) { has_priority = false; } }
     bool GetPriorityFlag(VehicleFlags flag) const { return priority[(int)flag]; }
 
     bool IsAvailableSpace(const Vehicle& v) const { return available_size > v.length; }
