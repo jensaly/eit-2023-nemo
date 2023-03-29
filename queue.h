@@ -30,7 +30,7 @@ struct Queue {
             real_x = veh.x + veh.length + veh.buf;
             vehicle.x = real_x;
         }
-        available_size = total_size - real_x;
+        available_size -= vehicle.length + vehicle.buf;
         vehicles.push_back(vehicle);
         total_vehicles++;
         t.total_vehicles++;
@@ -43,7 +43,7 @@ struct Queue {
     }
     void SetReservedFlag(VehicleFlags flag) { reserved[(int)flag] = true; has_reserved = true; }
     void UnsetReservedFlag(VehicleFlags flag) { reserved[(int)flag] = false; }
-    bool GetReservedFlag(VehicleFlags flag) { return reserved[(int)flag]; }
+    bool GetReservedFlag(VehicleFlags flag) const { return reserved[(int)flag]; }
     void SetPriorityFlag(VehicleFlags flag) { priority[(int)flag] = true; has_priority = true; }
     void UnsetPriorityFlag(VehicleFlags flag) { priority[(int)flag] = false; }
     bool GetPriorityFlag(VehicleFlags flag) const { return priority[(int)flag]; }

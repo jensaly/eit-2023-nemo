@@ -158,12 +158,14 @@ int main(int argc, char* argv[]) {
             if (ImGui::Selectable("Parallel worst fit")) { y.SetFineAlgorithm<WorstFitParallel>(); }
             ImGui::EndCombo();
         }
-        static std::vector<std::pair<size_t, size_t>> y_f_parallel;
+        static std::vector<std::pair<size_t, std::vector<size_t>>> y_f_parallel;
         if (y_f_parallel.empty()) {
             for (size_t i = 0; i < ferry.queues.size(); i++) {
-                y_f_parallel.push_back({i,i});
+                y_f_parallel.push_back({i,{i}});
             }
+            y_f_parallel[1].second.push_back(0);
         }
+        /*
         for (size_t i = 0; i < y.queues.size(); i++) {
             ImGui::Text(("Yard queue " + std::to_string(i) + " connects to ferry queue:").c_str());
             ImGui::SameLine();
@@ -178,10 +180,11 @@ int main(int argc, char* argv[]) {
             }
 
         }
+         */
         if (state == 0 && ImGui::Button("Generate cars")) {
             y.clear();
             ferry.clear();
-            y.SimulateQueueArrival(time);
+            y.SimulateQueueArrival(std::gamma_distribution<double>(1.4, 1.5), time);
             state = 1;
         }
         else if (state == 1 && ImGui::Button("Embark")) {

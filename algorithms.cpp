@@ -5,7 +5,7 @@
 
 //typedef std::ranges::drop_view<std::ranges::ref_view<std::vector<Queue>>> vecrange;
 
-void WorstFit::operator()(Ferry& ferry, Yard& yard, FileHandler& fh, std::vector<std::pair<size_t, size_t>> y_f_parallel) {
+void WorstFit::operator()(Ferry& ferry, Yard& yard, FileHandler& fh, std::vector<std::pair<size_t, std::vector<size_t>>> y_f_parallel) {
     Yard yard_cpy{yard};
     auto& queues = yard.queues;
     while (true) {
@@ -47,7 +47,7 @@ bool WorstFit::operator()(Yard& yard, Vehicle& vehicle) {
     return true;
 }
 
-void BestFit::operator()(Ferry& ferry, Yard& yard, FileHandler& fh, std::vector<std::pair<size_t, size_t>> y_f_parallel) {
+void BestFit::operator()(Ferry& ferry, Yard& yard, FileHandler& fh, std::vector<std::pair<size_t, std::vector<size_t>>> y_f_parallel) {
     Yard yard_cpy{yard};
     auto& queues = yard.queues;
     while (true) {
@@ -92,7 +92,7 @@ bool BestFit::operator()(Yard& yard, Vehicle& vehicle) {
 /*
  * Ambulances have the highest priority, will all be boarded first
  */
-void BasicRules::operator()(Ferry& ferry, Yard& yard, FileHandler& fh, std::vector<std::pair<size_t, size_t>> y_f_parallel) {
+void BasicRules::operator()(Ferry& ferry, Yard& yard, FileHandler& fh, std::vector<std::pair<size_t, std::vector<size_t>>> y_f_parallel) {
     Yard yard_cpy{yard};
     auto& queues = yard.queues;
     while (true) {
@@ -140,7 +140,7 @@ bool BasicRules::operator()(Yard& yard, Vehicle& vehicle) {
     std::priority_queue<std::pair<double, size_t>> queue_weight;
     for (int i = 0; i < queues.size(); i++) {
         auto& q = queues[i];
-        double vehicle_weight = 0;
+        double vehicle_weight = 1;
         /*
          * We check if a vehicle has reserved status in a queue
          * If it does, we give it a weighted sum.
@@ -164,9 +164,7 @@ bool BasicRules::operator()(Yard& yard, Vehicle& vehicle) {
         if (q.has_priority) {
             vehicle_weight = (priority_matches > 0) ? priority_matches : -1; // if we have 1 or more reserved matches, that queue gets a large bonus proportional to number of matches, otherwise a small penalty
         }
-        if (vehicle_weight == 0) { // normal car in a normal queue, pick the one with most available space
-            vehicle_weight = q.available_size / q.total_size;
-        }
+        vehicle_weight *= q.available_size / q.total_size;
         queue_weight.push(std::pair<double, size_t>(vehicle_weight, i));
     }
     auto best = queue_weight.top();
@@ -180,7 +178,6 @@ bool BasicRules::operator()(Yard& yard, Vehicle& vehicle) {
         best = queue_weight.top();
         best_queue = &queues[best.second];
     }
-    // If the best queue has a negative value, it is reserved and thus we cannot enter it.
     best_queue->AddVehicleToQueue(vehicle, yard);
     return true;
 }
@@ -239,7 +236,7 @@ void FindPresentBest(std::vector<FerryYardCombo>& fyc) {
  * restrictions. First, it handles ambulances and other priority vehicles. Then, once every row is
  * filled, the best solution is picked and new solutions spring from it.
  */
-void OptimizeCOM::operator()(Ferry& f, Yard& y, FileHandler& fh, std::vector<std::pair<size_t, size_t>> y_f_parallel) {
+void OptimizeCOM::operator()(Ferry& f, Yard& y, FileHandler& fh, std::vector<std::pair<size_t, std::vector<size_t>>> y_f_parallel) {
     Yard yard_cpy{y};
     // Handling priority vehicles. This is similar to the solution presented in BasicRules
     LoadReservedVehicles(f, y);
@@ -282,26 +279,67 @@ bool OptimizeCOM::operator()(Yard& yard, Vehicle& vehicle) {
     return false;
 }
 
+void LoadHighPriorityEvenly(Queue& q, Ferry& f, Yard& y) {
+    while (!q.vehicles.empty()) {
+        auto veh_it = q.vehicles.begin();
+        auto min_q = std::max_element(f.queues.begin(), f.queues.end(), [&](const Queue& q1, const Queue q2){ return q1.available_size < q2.available_size; });
+        auto& f_min_q = *min_q;
+        q.EraseVehicleFromQueue(veh_it, y);
+        min_q->AddVehicleToQueue(std::move(*veh_it), f);
+    }
+}
 
-void WorstFitParallel::operator()(Ferry& ferry, Yard& yard, FileHandler& fh, std::vector<std::pair<size_t, size_t>> y_f_parallel) {
+void ShiftCOMByShiftingCars(Ferry& f) {
+    auto min_q = std::min_element(f.queues.begin(), f.queues.end(), [&](const Queue& q1, const Queue q2){ return q1.available_size < q2.available_size; });
+    double min_q_dist = min_q->available_size;
+    double com_x_dist = f.car_com.first - f.com.first;
+    double x_shift = abs((min_q_dist < abs(com_x_dist)) ? min_q_dist : com_x_dist);
+    for (auto& q : f.queues) {
+        for (auto& v : q.vehicles) {
+            v.x += x_shift;
+        }
+    }
+    f.FindCOM();
+}
+
+void WorstFitParallel::operator()(Ferry& ferry, Yard& yard, FileHandler& fh, std::vector<std::pair<size_t, std::vector<size_t>>> y_f_parallel) {
     Yard yard_cpy{yard};
+    // Ambulances override existing rules and load first, alone, and immediately to the first row, if possible.
+    auto it = std::find_if(yard.queues.begin(), yard.queues.end(), [](const Queue& q){ return q.GetReservedFlag(VehicleFlags::Ambulance); });
+    LoadHighPriorityEvenly(*it, ferry, yard);
     if (y_f_parallel.empty()) {
         for (size_t i = 0; i < ferry.queues.size(); i++) {
-            y_f_parallel.push_back({i,i});
+            y_f_parallel.push_back({i,{i}});
         }
     }
     for (auto& y_f_combo : y_f_parallel) {
-        auto& fq = ferry.queues[y_f_combo.second];
-        auto& yq = yard.queues[y_f_combo.first];
-        //auto& fq_vehicles = fq.vehicles;
-        auto& yq_vehicles = yq.vehicles;
-        while (!yq_vehicles.empty()) {
-            auto v_first = yq_vehicles.begin();
-            fq.AddVehicleToQueue(std::move(*v_first), ferry);
-            yq.EraseVehicleFromQueue(v_first, yard);
+        if (y_f_combo.second.size() == 1) {
+            auto &fq = ferry.queues[y_f_combo.second[0]];
+            auto &yq = yard.queues[y_f_combo.first];
+            //auto& fq_vehicles = fq.vehicles;
+            auto &yq_vehicles = yq.vehicles;
+            while (!yq_vehicles.empty()) {
+                auto v_first = yq_vehicles.begin();
+                fq.AddVehicleToQueue(std::move(*v_first), ferry);
+                yq.EraseVehicleFromQueue(v_first, yard);
+            }
+        } else {
+            auto &yq = yard.queues[y_f_combo.first];
+            auto &yq_vehicles = yq.vehicles;
+            while (!yq_vehicles.empty()) {
+                std::vector<std::vector<Queue>::iterator> it_vec;
+                for (size_t index : y_f_combo.second) {
+                    it_vec.push_back(ferry.queues.begin() + index);
+                }
+                auto& fq = **std::max_element(it_vec.begin(), it_vec.end(), [&](const std::vector<Queue>::iterator& q1, const std::vector<Queue>::iterator q2){ return q1->available_size < q2->available_size; });
+                auto v_first = yq_vehicles.begin();
+                fq.AddVehicleToQueue(std::move(*v_first), ferry);
+                yq.EraseVehicleFromQueue(v_first, yard);
+            }
         }
     }
     ferry.FindCOM();
+    ShiftCOMByShiftingCars(ferry);
     fh.Write(ferry, yard_cpy);
 }
 // Coarse-sorting version of WorstFit algorithm, individual car arrival into queues
