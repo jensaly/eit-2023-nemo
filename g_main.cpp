@@ -111,11 +111,11 @@ int main(int argc, char* argv[]) {
     // Main loop
     bool done = false;
     srand(time(NULL));
-    Yard y = Yard(BasicRules(), WorstFitParallel(), 6, 90, 3);
+    Yard y = Yard(BasicRules(), WorstFitParallel(), 7, 90, 3);
     y.queues[0].SetReservedFlag(VehicleFlags::Ambulance);
     y.queues[0].SetReservedFlag(VehicleFlags::HC);
-    y.queues[2].SetReservedFlag(VehicleFlags::Heavy);
     y.queues[3].SetReservedFlag(VehicleFlags::Heavy);
+    y.queues[4].SetReservedFlag(VehicleFlags::Heavy);
     y.queues[5].SetPriorityFlag(VehicleFlags::Electric);
     Ferry ferry{6, 130, 3.4, 20.7, 130}; // 130m lengde, 20.7m bredde
     int state = 0; // 0 is no cars, 1 is cars in yard, 2 is cars in ferry
@@ -160,27 +160,17 @@ int main(int argc, char* argv[]) {
         }
         static std::vector<std::pair<size_t, std::vector<size_t>>> y_f_parallel;
         if (y_f_parallel.empty()) {
-            for (size_t i = 0; i < ferry.queues.size(); i++) {
-                y_f_parallel.push_back({i,{i}});
+            for (size_t i = 1; i < y.queues.size(); i++) {
+                y_f_parallel.push_back({i,{i-1}});
             }
-            y_f_parallel[1].second.push_back(0);
         }
-        /*
-        for (size_t i = 0; i < y.queues.size(); i++) {
-            ImGui::Text(("Yard queue " + std::to_string(i) + " connects to ferry queue:").c_str());
-            ImGui::SameLine();
-            ImGui::SetNextItemWidth(100);
-            if (ImGui::BeginCombo(("##" + std::to_string(i)).c_str(), std::to_string(y_f_parallel[i].second).c_str())) {
-                for (size_t j = 0; j < y_f_parallel.size(); j++) {
-                    if (ImGui::Selectable(std::to_string(j).c_str())) {
-                        y_f_parallel[i].second = j;
-                    }
-                }
-                ImGui::EndCombo();
+        for (size_t i = 0; i < y_f_parallel.size(); i++) {
+            ImGui::Text(("Yard queue " + std::to_string(y_f_parallel[i].first) + " connects to ferry queues:").c_str());
+            for (size_t j = 0; j < y_f_parallel[i].second.size(); j++) {
+                ImGui::SameLine();
+                ImGui::Text(std::to_string(y_f_parallel[i].second[j]).c_str());
             }
-
         }
-         */
         if (state == 0 && ImGui::Button("Generate cars")) {
             y.clear();
             ferry.clear();
