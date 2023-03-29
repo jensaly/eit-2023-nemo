@@ -41,7 +41,7 @@ if (SDL_FOUND)
             )
 else()
     set(SOURCES main.cpp vehicle.cpp yard.cpp ferry.cpp algorithms.cpp queue.cpp fetchVehicleData.cpp)
-    set(HEADERS utility.h vehicle.h yard.h ferry.h algorithms.h FileHandler.h filehandler.cpp queue.h fetchVehicleData.cpp)
+    set(HEADERS utility.h vehicle.h yard.h ferry.h algorithms.h FileHandler.h filehandler.cpp queue.h fetchVehicleData.cpp randomRegistrationNumber.cpp randomRegistrationNumber.h)
     add_executable(eit ${SOURCES} ${HEADERS})
 
     target_link_libraries(eit PUBLIC curl)

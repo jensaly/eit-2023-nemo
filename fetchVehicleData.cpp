@@ -7,23 +7,30 @@
 
 using json = nlohmann::json;
 
-struct Vehicle {
-    std::string kjennemerke;
-    int lengde{};
-    int bredde{};
-    int vekt{};
-    std::string motor;
-    std::string drivstofftype;
-};
-
-// This function will be called by curl to handle the response
+/**
+ * This function will be called by curl to handle the response
+ * @param ptr Pointer to a buffer that contains the data that was received from the HTTP request.
+ * @param size The size of each data element in the buffer (char in this case).
+ * @param nmemb The number of data elements in the buffer (the number of char elements in the buffer).
+ * @param stream Pointer to a string object that will be used to store the received data. The callback function appends the received data to this string
+ * @return
+ */
 static size_t write_callback(char* ptr, size_t size, size_t nmemb, std::string* stream) {
     size_t bytes = size * nmemb;
     stream->append(ptr, bytes);
     return bytes;
 }
 
-void Make_curl_request(const std::string& car_ID) {
+/**
+ * Method that makes the API call to fetch vehicle data about the vehicle with licence plate number car_ID
+ * @param car_ID The licence plate number of the vehicle of interest
+ * @return The vehicle object with the needed vehicle data
+ */
+API_Vehicle Make_curl_request(const std::string& car_ID) {
+    // Vehicle object that will be used to store vehicle data
+    API_Vehicle vehicle;
+
+    // Reads the API key
     std::ifstream credentialsFile("../config/api_key.txt");
     std::cout << std::filesystem::current_path() << std::endl;
     std::string api_key;
@@ -36,7 +43,7 @@ void Make_curl_request(const std::string& car_ID) {
 
     CURL* curl = curl_easy_init();
     curl_slist* headers = nullptr;
-    //std::string api_key = "2791f35c-81dc-4c2a-b21c-21f7b26e861e";
+    // URL to the Statens Vegvesen API (without the licence plate of interest)
     std::string base_url = "https://www.vegvesen.no/ws/no/vegvesen/kjoretoy/felles/datautlevering/enkeltoppslag/kjoretoydata?kjennemerke=";
 
     if (curl) {
@@ -64,13 +71,14 @@ void Make_curl_request(const std::string& car_ID) {
         } else {
             json j = json::parse(response_string);
 
-            Vehicle vehicle;
+            // Saves the response data of interest into the vehicle object
             vehicle.kjennemerke = j["kjoretoydataListe"][0]["kjoretoyId"]["kjennemerke"].get<std::string>();
             vehicle.lengde = j["kjoretoydataListe"][0]["godkjenning"]["tekniskGodkjenning"]["tekniskeData"]["dimensjoner"]["lengde"].get<int>();
             vehicle.bredde = j["kjoretoydataListe"][0]["godkjenning"]["tekniskGodkjenning"]["tekniskeData"]["dimensjoner"]["bredde"].get<int>();
             vehicle.vekt = j["kjoretoydataListe"][0]["godkjenning"]["tekniskGodkjenning"]["tekniskeData"]["vekter"]["egenvekt"].get<int>();
             vehicle.motor = j["kjoretoydataListe"][0]["godkjenning"]["tekniskGodkjenning"]["tekniskeData"]["motorOgDrivverk"]["motor"][0]["drivstoff"][0]["drivstoffKode"]["kodeNavn"].get<std::string>();
 
+            /*
             // Print the data in the Vehicle object
             std::cout << "Kjennemerke: " << vehicle.kjennemerke << std::endl;
             std::cout << "Lengde: " << vehicle.lengde << " cm" << std::endl;
@@ -79,11 +87,13 @@ void Make_curl_request(const std::string& car_ID) {
             std::cout << "Motor: " << vehicle.motor << std::endl;
 
             // Print the response
-            std::cout << response_string << std::endl;
+            std::cout << response_string << std::endl;*/
         }
 
         // Clean up
         curl_easy_cleanup(curl);
         curl_slist_free_all(headers);
     }
+
+    return vehicle;
 }

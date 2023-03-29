@@ -3,7 +3,7 @@
 #include <sys/stat.h>
 #include <curl/curl.h>
 #include "fetchVehicleData.h"
-
+#include "randomRegistrationNumber.h"
 
 int main() {
     srand(time(NULL));
@@ -15,9 +15,17 @@ int main() {
     y.SimulteQueueArrival(std::gamma_distribution(1.4, 1.5), 60);
     y.Embark(ferry);
 
-    //std::string car_ID = "EB11111";
-    //std::string car_ID = "DN33104";
-    std::string car_ID = "EL93214";
+    // Get a random registration number and store it in a variable
+    string car_ID = GetRandomRegistrationNumber("licence_plates.txt");
 
-    Make_curl_request(car_ID);
+    // Method for calling API for vehicle data
+    API_Vehicle apiVehicle = Make_curl_request(car_ID);
+
+    // Prints the data of the vehicle from the API
+    cout << "Kjennemerke: " << apiVehicle.kjennemerke << "\n";
+    cout << "Lengde: " << apiVehicle.lengde << "\n";
+    cout << "Bredde: " << apiVehicle.bredde << "\n";
+    cout << "Vekt: " << apiVehicle.vekt << "\n";
+    cout << "Motor: " << apiVehicle.motor << "\n";
+
 }
