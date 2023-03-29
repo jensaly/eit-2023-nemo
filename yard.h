@@ -34,14 +34,13 @@ struct Yard {
     // Current simulating arrivals with a generic, pre-initialized distribution
     // Uses a mersenne twister for generating random numbers from the distribution
     // Also uses a random generator for plate_nr at this time
-    void SimulateQueueArrival(double time)  {
+    template<typename T> void SimulateQueueArrival(T distribution, double time)  {
         static std::mt19937 generator{std::random_device{}()};
-        static std::gamma_distribution<double> distribution(1.4, 1.5);
         static std::uniform_real_distribution<double> unif(0.9, 1.1);
         double t = 0;
         while (t < time) {
             double dt = distribution(generator);
-            std::cout << t << "\n";
+            // std::cout << t << "\n";
             t += dt;
             std::string plate_nr = std::string(1, ('A' + rand()%26)) + std::string(1,('A' + rand()%26));
             plate_nr += std::to_string(rand() % 10) + std::to_string(rand() % 10) + std::to_string(rand() % 10) + std::to_string(rand() % 10) + std::to_string(rand() % 10);
@@ -51,7 +50,7 @@ struct Yard {
     }
 
     // Runs the embarking by calling operator() on the selected algorithm
-    void Embark(Ferry& f, std::vector<std::pair<size_t, size_t>> y_f_parallel) {
+    void Embark(Ferry& f, std::vector<std::pair<size_t, std::vector<size_t>>> y_f_parallel) {
         (*f_algorithm)(f, *this, fh, y_f_parallel);
     }
 
