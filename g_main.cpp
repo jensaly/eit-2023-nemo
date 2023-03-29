@@ -170,12 +170,21 @@ int main(int argc, char* argv[]) {
                 ImGui::SameLine();
                 //ImGui::Text(std::to_string(y_f_parallel[i].second[j]).c_str());
                 ImGui::SetNextItemWidth(100);
-                if (ImGui::BeginCombo(("##" + std::to_string(y_f_parallel[i].first)).c_str(), std::to_string(y_f_parallel[i].second[j]).c_str())) {
+                if (ImGui::BeginCombo(("##" + std::to_string(j) + std::to_string(y_f_parallel[i].first)).c_str(), std::to_string(y_f_parallel[i].second[j]).c_str())) {
                     for (int k = 0; k < ferry.queues.size(); k++) {
                         if (ImGui::Selectable(std::to_string(k).c_str())) y_f_parallel[i].second[j] = k;
                     }
                     ImGui::EndCombo();
                 }
+            }
+            ImGui::SameLine();
+            if (ImGui::Button(("+ ##" + std::to_string(y_f_parallel[i].first)).c_str())) {
+                y_f_parallel[i].second.push_back(0);
+            }
+
+            if (y_f_parallel[i].second.size() > 1) {
+                ImGui::SameLine();
+                if (ImGui::Button(("- ##" + std::to_string(y_f_parallel[i].first)).c_str())) y_f_parallel[i].second.pop_back();
             }
         }
         if (state == 0 && ImGui::Button("Generate cars")) {

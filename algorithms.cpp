@@ -293,13 +293,18 @@ void ShiftCOMByShiftingCars(Ferry& f) {
     auto min_q = std::min_element(f.queues.begin(), f.queues.end(), [&](const Queue& q1, const Queue q2){ return q1.available_size < q2.available_size; });
     double min_q_dist = min_q->available_size;
     double com_x_dist = f.car_com.first - f.com.first;
-    double x_shift = abs((min_q_dist < abs(com_x_dist)) ? min_q_dist : com_x_dist);
-    for (auto& q : f.queues) {
-        for (auto& v : q.vehicles) {
-            v.x += x_shift;
-        }
+    if (com_x_dist > 0) {
+        return;
     }
-    f.FindCOM();
+    else {
+        double x_shift = abs((min_q_dist < abs(com_x_dist)) ? min_q_dist : com_x_dist);
+        for (auto &q: f.queues) {
+            for (auto &v: q.vehicles) {
+                v.x += x_shift;
+            }
+        }
+        f.FindCOM();
+    }
 }
 
 void WorstFitParallel::operator()(Ferry& ferry, Yard& yard, FileHandler& fh, std::vector<std::pair<size_t, std::vector<size_t>>> y_f_parallel) {
