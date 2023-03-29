@@ -1,4 +1,5 @@
 #include "filehandler.h"
+#include "yard.h"
 
 namespace fs = std::filesystem;
 
@@ -8,7 +9,7 @@ FileHandler::FileHandler() {
     }
 }
 
-void FileHandler::Write(Ferry& f) {
+void FileHandler::Write(Ferry& f, Yard& y) {
     std::ofstream ofile("output/test.txt");
     ofile << f.length << " " << f.width << " " << f.queues[0].total_size << " " << f.queues[0].width << " " << f.queues.size();
     ofile << "\n\n";
@@ -16,6 +17,14 @@ void FileHandler::Write(Ferry& f) {
     std::string debug_buf = "debug";
     for (int i = 0; i < f.queues.size(); i++) {
         auto& q = f.queues[i];
+        for (int j = 0; j < q.vehicles.size(); j++) {
+            auto& v = q.vehicles[j];
+            ofile << v.type << " " << v.plate_nr << " " << v.arrival_time << " " << std::to_string(i) << " " << std::to_string(j) << " " << v.x << " " << v.y << " " << v.length << " " << v.width << " " << v.mass << "\n";
+        }
+    }
+    ofile << "\n";
+    for (int i = 0; i < y.queues.size(); i++) {
+        auto& q = y.queues[i];
         for (int j = 0; j < q.vehicles.size(); j++) {
             auto& v = q.vehicles[j];
             ofile << v.type << " " << v.plate_nr << " " << v.arrival_time << " " << std::to_string(i) << " " << std::to_string(j) << " " << v.x << " " << v.y << " " << v.length << " " << v.width << " " << v.mass << "\n";

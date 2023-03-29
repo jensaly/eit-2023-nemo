@@ -21,8 +21,16 @@ struct Queue {
     Queue(std::string name, float size, float width, float y, std::initializer_list<VehicleFlags> reserved_flags = {}, std::initializer_list<VehicleFlags> priority_flags = {});
     template<typename T> void AddVehicleToQueue(Vehicle vehicle, T& t) {
         vehicle.y = y + (width - vehicle.width) / 2;
-        vehicle.x = total_size - available_size;
-        available_size -= vehicle.length;
+        float real_x = 0;
+        if (vehicles.empty()) {
+            vehicle.x = real_x;
+        }
+        else {
+            auto& veh = vehicles.back();
+            real_x = veh.x + veh.length + veh.buf;
+            vehicle.x = real_x;
+        }
+        available_size = total_size - real_x;
         vehicles.push_back(vehicle);
         total_vehicles++;
         t.total_vehicles++;
