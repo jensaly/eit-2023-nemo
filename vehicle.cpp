@@ -33,6 +33,7 @@ Vehicle::Vehicle(std::string type, std::string plate_nr, float length, float wid
     characteristics = std::vector<bool>(100, false);
     std::uniform_int_distribution rand;
     if (mass > 1350) {
+        this->type = "H";
         SetFlag(VehicleFlags::Heavy);
         this->length *= 3;
     } else if (rand(generator)%3 == 0) {

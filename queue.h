@@ -12,7 +12,9 @@ struct Queue {
     uint16_t total_vehicles = 0;
     float y;
     std::vector<bool> reserved; // lane is reserved exclusively for certain types of vehicle
+    std::vector<int64_t> reserved_score;
     std::vector<bool> priority; // lane has priority for a specific types of vehicles
+    std::vector<int64_t> priority_score;
     bool has_reserved = false;
     bool has_priority = false;
     bool superpriority = false;
@@ -42,12 +44,16 @@ struct Queue {
         total_vehicles--;
         t.total_vehicles++;
     }
-    void SetReservedFlag(VehicleFlags flag) { reserved[(int)flag] = true; has_reserved = true; }
+    void SetReservedFlag(VehicleFlags flag) { reserved[(int)flag] = true; reserved_score[int(flag)] = 10000; has_reserved = true; }
     void UnsetReservedFlag(VehicleFlags flag) { reserved[(int)flag] = false; if (std::all_of(reserved.begin(), reserved.end(), [](const bool& b){ return !b; })) { has_reserved = false; } }
     bool GetReservedFlag(VehicleFlags flag) const { return reserved[(int)flag]; }
-    void SetPriorityFlag(VehicleFlags flag) { priority[(int)flag] = true; has_priority = true; }
+    void SetReservedPoints(VehicleFlags flag, int64_t score) { reserved[(int)flag] = true; reserved_score[int(flag)] = score; has_reserved = true; }
+
+    void SetPriorityFlag(VehicleFlags flag) { priority[(int)flag] = true; priority_score[int(flag)] = 1;  has_priority = true; }
     void UnsetPriorityFlag(VehicleFlags flag) { priority[(int)flag] = false; if (std::all_of(priority.begin(), priority.end(), [](const bool& b){ return !b; })) { has_priority = false; } }
     bool GetPriorityFlag(VehicleFlags flag) const { return priority[(int)flag]; }
+    void SetPriorityPoints(VehicleFlags flag, int64_t score) { reserved[(int)flag] = true; priority_score[int(flag)] = score; has_reserved = true; }
+
     void SetSuperPriority(bool set) { superpriority = set; }
     bool GetSuperPriority() const { return superpriority; }
 

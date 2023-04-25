@@ -151,18 +151,22 @@ bool BasicRules::operator()(Yard& yard, Vehicle& vehicle) {
         for (int j = 0; j < q.reserved.size(); j++) {
             if (vehicle.characteristics[j] && q.reserved[j]) { // if the queue's reserved status matches the vehicle
                 reserved_matches++;
+                vehicle_weight += q.reserved_score[j];
             }
         }
         for (int j = 0; j < q.reserved.size(); j++) {
             if (vehicle.characteristics[j] && q.priority[j]) { // if the queue's priority status matches the vehicle
                 priority_matches++;
+                vehicle_weight += q.priority_score[j];
             }
         }
         if (q.has_reserved) {
-            vehicle_weight = (reserved_matches > 0) ? reserved_matches * 10000 : -10000; // if we have 1 or more reserved matches, that queue gets a large bonus proportional to number of matches, otherwise a large penalty
+            //vehicle_weight = (reserved_matches > 0) ? reserved_matches * 10000 : -10000; // if we have 1 or more reserved matches, that queue gets a large bonus proportional to number of matches, otherwise a large penalty
+            vehicle_weight = (reserved_matches > 0) ? vehicle_weight-1 : -10000;
         }
         if (q.has_priority) {
-            vehicle_weight = (priority_matches > 0) ? priority_matches : -1; // if we have 1 or more reserved matches, that queue gets a large bonus proportional to number of matches, otherwise a small penalty
+            //vehicle_weight = (priority_matches > 0) ? priority_matches : -1; // if we have 1 or more reserved matches, that queue gets a large bonus proportional to number of matches, otherwise a small penalty
+            vehicle_weight = (priority_matches > 0) ? vehicle_weight-1 : -1;
         }
         vehicle_weight *= q.available_size / q.total_size;
         queue_weight.push(std::pair<double, size_t>(vehicle_weight, i));
@@ -292,6 +296,9 @@ void LoadHighPriorityEvenly(Queue& q, Ferry& f, Yard& y) {
 
 void ShiftCOMByShiftingCars(Ferry& f) {
     auto min_q = std::min_element(f.queues.begin(), f.queues.end(), [&](const Queue& q1, const Queue q2){ return q1.available_size < q2.available_size; });
+    if (min_q->available_size < 0) {
+        return;
+    }
     float min_q_dist = min_q->available_size;
     double com_x_dist = f.car_com.first - f.com.first;
     if (com_x_dist > 0) {

@@ -4,6 +4,8 @@ Queue::Queue(std::string name, float size, float width, float y, std::initialize
         : name{std::move(name)}, available_size{size}, total_size{size}, width{width}, y{y} {
     reserved = std::vector<bool>(100, false);
     priority = std::vector<bool>(100, false);
+    reserved_score = std::vector<int64_t>(100, false);
+    priority_score = std::vector<int64_t>(100, false);
     for (auto& i : reserved_flags) {
         SetReservedFlag(i);
     }
