@@ -23,6 +23,8 @@ void FileHandler::Write(Ferry& f, Yard& y) {
         }
     }
     ofile << "\n";
+    ofile << y.queues[0].total_size << " " << y.queues[0].width << " " << y.queues.size();
+    ofile << "\n\n";
     for (int i = 0; i < y.queues.size(); i++) {
         auto& q = y.queues[i];
         for (int j = 0; j < q.vehicles.size(); j++) {
