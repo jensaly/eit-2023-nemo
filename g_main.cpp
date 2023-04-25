@@ -44,6 +44,7 @@ void PlotQueues(Yard& yard, bool plate_nr, bool car_type, bool queue_nr) {
         ImPlot::PlotLine(("Line " + std::to_string(i)).c_str(), xvals, yvals, 2);
         ImPlot::PlotText(q.name.c_str(), -5, q.y + q.width / 2);
     }
+    ImPlot::PlotText(("Vehicles in pre-yard: " + std::to_string(yard.pre_yard.size())).c_str(), -5, yard.queues.size() * yard.queues[0].width + 5);
     ImPlot::EndPlot();
 }
 

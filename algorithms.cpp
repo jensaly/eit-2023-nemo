@@ -175,7 +175,7 @@ bool BasicRules::operator()(Yard& yard, Vehicle& vehicle) {
     auto best_queue = &queues[best.second];
     // Finds
     while (!best_queue->IsAvailableSpace(vehicle)) {
-        if (queue_weight.empty() || best.first < 0) {
+        if (queue_weight.empty() || !best_queue->has_reserved) {
             return false;
         }
         queue_weight.pop();
