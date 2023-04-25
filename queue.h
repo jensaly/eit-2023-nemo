@@ -15,6 +15,7 @@ struct Queue {
     std::vector<bool> priority; // lane has priority for a specific types of vehicles
     bool has_reserved = false;
     bool has_priority = false;
+    bool superpriority = false;
 
     std::vector<Vehicle> vehicles;
 
@@ -47,6 +48,8 @@ struct Queue {
     void SetPriorityFlag(VehicleFlags flag) { priority[(int)flag] = true; has_priority = true; }
     void UnsetPriorityFlag(VehicleFlags flag) { priority[(int)flag] = false; if (std::all_of(priority.begin(), priority.end(), [](const bool& b){ return !b; })) { has_priority = false; } }
     bool GetPriorityFlag(VehicleFlags flag) const { return priority[(int)flag]; }
+    void SetSuperPriority(bool set) { superpriority = set; }
+    bool GetSuperPriority() const { return superpriority; }
 
     bool IsAvailableSpace(const Vehicle& v) const { return available_size > v.length; }
     void clear();

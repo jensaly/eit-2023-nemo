@@ -113,6 +113,7 @@ int main(int argc, char* argv[]) {
     srand(time(NULL));
     Yard y = Yard(BasicRules(), WorstFitParallel(), 7, 90, 3);
     y.queues[0].SetReservedFlag(VehicleFlags::Ambulance);
+    y.queues[0].SetSuperPriority(true);
     y.queues[0].SetReservedFlag(VehicleFlags::HC);
     y.queues[3].SetReservedFlag(VehicleFlags::Heavy);
     y.queues[4].SetReservedFlag(VehicleFlags::Heavy);
@@ -160,6 +161,7 @@ int main(int argc, char* argv[]) {
         }
         static std::vector<std::pair<size_t, std::vector<size_t>>> y_f_parallel;
         if (y_f_parallel.empty()) {
+            y_f_parallel.push_back({0,{0}});
             for (size_t i = 1; i < y.queues.size(); i++) {
                 y_f_parallel.push_back({i,{i-1}});
             }
@@ -247,6 +249,7 @@ int main(int argc, char* argv[]) {
                     q.SetReservedFlag(selected_flag);
                 }
             }
+            ImGui::Checkbox("Superpriority", &q.superpriority);
             ImGui::Text("Reserved status");
             for (auto e = VehicleFlags::Ambulance; e != VehicleFlags::End; ++e) {
                 if (q.GetReservedFlag(e)) {

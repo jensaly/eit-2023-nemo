@@ -291,7 +291,7 @@ void LoadHighPriorityEvenly(Queue& q, Ferry& f, Yard& y) {
 
 void ShiftCOMByShiftingCars(Ferry& f) {
     auto min_q = std::min_element(f.queues.begin(), f.queues.end(), [&](const Queue& q1, const Queue q2){ return q1.available_size < q2.available_size; });
-    double min_q_dist = min_q->available_size;
+    float min_q_dist = min_q->available_size;
     double com_x_dist = f.car_com.first - f.com.first;
     if (com_x_dist > 0) {
         return;
@@ -310,9 +310,10 @@ void ShiftCOMByShiftingCars(Ferry& f) {
 void WorstFitParallel::operator()(Ferry& ferry, Yard& yard, FileHandler& fh, std::vector<std::pair<size_t, std::vector<size_t>>> y_f_parallel) {
     Yard yard_cpy{yard};
     // Ambulances override existing rules and load first, alone, and immediately to the first row, if possible.
-    auto it = std::find_if(yard.queues.begin(), yard.queues.end(), [](const Queue& q){ return q.GetReservedFlag(VehicleFlags::Ambulance); });
-    if (it != yard.queues.end()) {
-        LoadHighPriorityEvenly(*it, ferry, yard);
+    for (auto& q : yard.queues) {
+        if (q.GetSuperPriority()) {
+            LoadHighPriorityEvenly(q, ferry, yard);
+        }
     }
     if (y_f_parallel.empty()) {
         for (size_t i = 0; i < ferry.queues.size(); i++) {
