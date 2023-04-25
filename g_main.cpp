@@ -1,7 +1,7 @@
 #include "g_utility.h"
 #include "yard.h"
 
-void PlotQueues(Ferry& ferry) {
+void PlotQueues(Ferry& ferry, bool plate_nr, bool car_type, bool queue_nr) {
     for (int i = 0; i < ferry.queues.size(); i++) {
         auto& q = ferry.queues[i];
         for (int j = 0; j < ferry.queues[i].vehicles.size(); j++) {
@@ -9,6 +9,10 @@ void PlotQueues(Ferry& ferry) {
             ImVec2 bottom = ImPlot::PlotToPixels(ImVec2(v.x, v.y));
             ImVec2 top = ImPlot::PlotToPixels(ImVec2(v.x + v.length, v.y + v.width));
             ImPlot::GetPlotDrawList()->AddRectFilled(bottom, top, ImGui::ColorConvertFloat4ToU32(ImVec4(v.col[0], v.col[1], v.col[2], v.col[3])));
+            std::string show_str = ((queue_nr) ? v.y_q_loaded : "") + ((plate_nr) ? " " + v.plate_nr : "") + ((car_type) ? " " + v.type : "");
+            ImPlot::PushStyleColor(ImPlotCol_InlayText, ImVec4(0,0,0,1));
+            ImPlot::PlotText(show_str.c_str(), v.x + v.length / 2, v.y + v.width / 2);
+            ImPlot::PopStyleColor();
         }
         double xvals[2] = {0, q.total_size};
         double yvals[2] = {q.width * (i+1), q.width * (i+1)};
@@ -17,11 +21,12 @@ void PlotQueues(Ferry& ferry) {
         ImPlot::PlotScatter("Car COM", &car_x, &car_y, 1);
         float x = ferry.com.first, y = ferry.com.second;
         ImPlot::PlotScatter("COM", &x, &y, 1);
+        ImPlot::PlotText(q.name.c_str(), -5, q.y + q.width / 2);
     }
     ImPlot::EndPlot();
 }
 
-void PlotQueues(Yard& yard) {
+void PlotQueues(Yard& yard, bool plate_nr, bool car_type, bool queue_nr) {
     for (int i = 0; i < yard.queues.size(); i++) {
         auto& q = yard.queues[i];
         for (int j = 0; j < yard.queues[i].vehicles.size(); j++) {
@@ -29,10 +34,15 @@ void PlotQueues(Yard& yard) {
             ImVec2 bottom = ImPlot::PlotToPixels(ImVec2(v.x, v.y));
             ImVec2 top = ImPlot::PlotToPixels(ImVec2(v.x + v.length, v.y + v.width));
             ImPlot::GetPlotDrawList()->AddRectFilled(bottom, top, ImGui::ColorConvertFloat4ToU32(ImVec4(v.col[0], v.col[1], v.col[2], v.col[3])));
+            std::string show_str = ((queue_nr) ? v.y_q_loaded : "") + ((plate_nr) ? " " + v.plate_nr : "") + ((car_type) ? " " + v.type : "");
+            ImPlot::PushStyleColor(ImPlotCol_InlayText, ImVec4(0,0,0,1));
+            ImPlot::PlotText(show_str.c_str(), v.x + v.length / 2, v.y + v.width / 2);
+            ImPlot::PopStyleColor();
         }
         double xvals[2] = {0, q.total_size};
         double yvals[2] = {q.width * (i+1), q.width * (i+1)};
         ImPlot::PlotLine(("Line " + std::to_string(i)).c_str(), xvals, yvals, 2);
+        ImPlot::PlotText(q.name.c_str(), -5, q.y + q.width / 2);
     }
     ImPlot::EndPlot();
 }
@@ -121,6 +131,7 @@ int main(int argc, char* argv[]) {
     Ferry ferry{6, 130, 3.4, 20.7, 130}; // 130m lengde, 20.7m bredde
     int state = 0; // 0 is no cars, 1 is cars in yard, 2 is cars in ferry
     double time = 120;
+    bool show_car_plate = true, show_car_type = true, show_car_queue = true;
     while (!done)
     {
         // Poll and handle events (inputs, window resize, etc.)
@@ -201,9 +212,12 @@ int main(int argc, char* argv[]) {
         }
         ImGui::SameLine();
         ImGui::InputDouble("Generation time", &time);
+        ImGui::Checkbox("Car plate #", &show_car_plate); ImGui::SameLine();
+        ImGui::Checkbox("Car queue #", &show_car_queue); ImGui::SameLine();
+        ImGui::Checkbox("Car type", &show_car_type);
         if (ImPlot::BeginPlot("Cars", ImVec2(-1, -1), ImPlotFlags_AntiAliased | ImPlotFlags_Equal)) {
-            if (state == 1) PlotQueues(y);
-            else PlotQueues(ferry);
+            if (state == 1) PlotQueues(y, show_car_plate, show_car_type, show_car_queue);
+            else PlotQueues(ferry, show_car_plate, show_car_type, show_car_queue);
         }
         ImGui::End();
         ImGui::Begin("Queue editing");

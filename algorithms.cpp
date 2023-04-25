@@ -178,6 +178,7 @@ bool BasicRules::operator()(Yard& yard, Vehicle& vehicle) {
         best = queue_weight.top();
         best_queue = &queues[best.second];
     }
+    vehicle.y_q_loaded = best_queue->name;
     best_queue->AddVehicleToQueue(vehicle, yard);
     return true;
 }
@@ -284,8 +285,8 @@ void LoadHighPriorityEvenly(Queue& q, Ferry& f, Yard& y) {
         auto veh_it = q.vehicles.begin();
         auto min_q = std::max_element(f.queues.begin(), f.queues.end(), [&](const Queue& q1, const Queue q2){ return q1.available_size < q2.available_size; });
         auto& f_min_q = *min_q;
-        q.EraseVehicleFromQueue(veh_it, y);
         min_q->AddVehicleToQueue(std::move(*veh_it), f);
+        q.EraseVehicleFromQueue(veh_it, y);
     }
 }
 
